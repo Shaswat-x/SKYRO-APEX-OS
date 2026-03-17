@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SKYRO V19 | ARCHITECT EDITION</title>
+    <title>SKYRO V19.3 | INSTANT STREAM</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --p: #00f2ff; --bg: #000105; --red: #ff003c; --glow: 0 0 40px rgba(0, 242, 255, 0.7); }
@@ -11,43 +11,38 @@
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
         body, html { background: #000; color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 2500px; }
 
-        /* V19 PRE-LOADER */
-        #loader { position: fixed; inset: 0; background: #000; z-index: 50000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .load-ring { width: 150px; height: 150px; border: 2px solid rgba(0, 242, 255, 0.1); border-top: 2px solid var(--p); border-radius: 50%; animation: spin 1s linear infinite; }
-        .load-txt { margin-top: 30px; font-family: 'Source Code Pro'; letter-spacing: 5px; font-size: 0.8rem; color: var(--p); text-transform: uppercase; }
+        /* V19.3 INSTANT LOADER */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 100000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .load-ring { width: 100px; height: 100px; border: 2px solid rgba(0, 242, 255, 0.1); border-top: 2px solid var(--p); border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .load-txt { margin-top: 20px; font-family: 'Source Code Pro'; letter-spacing: 5px; font-size: 0.8rem; color: var(--p); }
 
-        /* SCANLINE FX */
-        body::before { content: " "; position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 10000; background-size: 100% 4px, 3px 100%; pointer-events: none; }
-        
-        #ui-wrapper { position: relative; width: 100%; height: 100%; z-index: 10; display: none; opacity: 0; transition: 1.5s; }
+        #handshake { position: fixed; inset: 0; z-index: 90000; background: #000; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        .hand-scanner { width: 220px; height: 220px; border: 4px double #0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; animation: glowPulse 2s infinite; }
+
+        #ui-wrapper { position: fixed; inset: 0; z-index: 80000; display: none; opacity: 0; transition: 1.2s; background: var(--bg); }
         .glass { background: rgba(0, 5, 15, 0.9); border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(50px); border-radius: 20px; }
 
         #container { display: grid; grid-template-columns: 340px 1fr; grid-template-rows: 140px 1fr; height: 100vh; padding: 20px; gap: 20px; }
         header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 0 50px; }
         .logo-text { font-size: 2.5rem; font-weight: 900; letter-spacing: 12px; text-shadow: var(--glow); }
-        .tagline { font-size: 1rem; letter-spacing: 5px; opacity: 0.8; margin-top: 5px; color: var(--p); }
-
-        /* SPEEDOMETER HUD */
+        
+        aside { display: flex; flex-direction: column; }
         #speedo-wrap { padding: 30px; text-align: center; border-bottom: 1px solid rgba(0,242,255,0.1); }
         .gauge-val { font-size: 3.5rem; font-weight: 900; text-shadow: var(--glow); }
         
-        .nitro-btn { background: rgba(255,0,60,0.1); border: 2px solid var(--red); color: var(--red); padding: 15px; margin: 20px; font-weight: 900; letter-spacing: 4px; cursor: pointer; transition: 0.3s; }
-        .nitro-btn:hover { background: var(--red); color: #fff; box-shadow: 0 0 40px var(--red); }
-
-        /* CARDS */
         main { position: relative; overflow-y: auto; scrollbar-width: none; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; padding: 30px; transform-style: preserve-3d; }
         .card { padding: 45px; text-align: center; transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); transform-style: preserve-3d; background: rgba(0, 242, 255, 0.03); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 10px 40px; }
         .card:hover { border-color: var(--p); transform: translateZ(100px) rotateY(10deg); box-shadow: var(--glow); }
 
-        .back-btn { position: absolute; top: 30px; left: 30px; padding: 15px 45px; border: 2px solid var(--p); background: #000; color: var(--p); font-weight: 900; border-radius: 0 25px; box-shadow: var(--glow); z-index: 1000; text-decoration: none; }
+        .back-btn { position: absolute; top: 30px; left: 30px; padding: 12px 45px; border: 2px solid var(--p); background: #000; color: var(--p); font-weight: 900; border-radius: 0 25px; box-shadow: var(--glow); z-index: 1000; text-decoration: none; }
         .open-btn { display: inline-block; padding: 22px 70px; border: 3px solid var(--p); background: transparent; color: var(--p); font-weight: 900; letter-spacing: 6px; font-size: 1.3rem; border-radius: 0 50px; transition: 0.4s; box-shadow: var(--glow); }
 
         .viewport-3d { width: 400px; height: 400px; transform-style: preserve-3d; position: relative; }
         .reactor { width: 100%; height: 100%; border-radius: 50%; border: 10px solid var(--p); animation: hyperSpin 4s linear infinite; box-shadow: var(--glow), inset var(--glow); position: absolute; }
-        .reactor::after { content: ''; position: absolute; inset: 40px; border: 4px dashed var(--p); border-radius: 50%; animation: hyperSpin 2s linear infinite reverse; }
-
+        
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 20px #0f0; } 50% { box-shadow: 0 0 60px #0f0; } }
         @keyframes hyperSpin { from { transform: rotateY(0) rotateX(65deg); } to { transform: rotateY(360deg) rotateX(65deg); } }
         @keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
     </style>
@@ -56,14 +51,14 @@
 
     <div id="loader">
         <div class="load-ring"></div>
-        <div class="load-txt" id="load-msg">INITIALIZING SYSTEMS...</div>
+        <div class="load-txt">AUTHORIZING SHASWAT...</div>
     </div>
 
-    <div id="handshake" style="display:none;" onclick="boot()">
-        <div style="width:240px; height:240px; border:4px double #0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;">
+    <div id="handshake" onclick="boot()">
+        <div class="hand-scanner">
             <div style="position:absolute; width:100%; height:4px; background:#0f0; top:0; animation:scanLine 2s infinite ease-in-out; box-shadow:0 0 25px #0f0;"></div>
         </div>
-        <div style="margin-top:30px; color:#0f0; font-size:1.1rem; letter-spacing:5px;">ARCHITECT VERIFIED: SHASWAT</div>
+        <div style="margin-top:30px; color:#0f0; font-size:1.1rem; letter-spacing:5px;">ACCESS GRANTED: 100%</div>
     </div>
 
     <canvas id="nebula-canvas" style="position:fixed; inset:0; z-index:0;"></canvas>
@@ -73,16 +68,16 @@
             <header class="glass">
                 <div class="branding">
                     <div class="logo-text">SKYRO | <span style="font-weight:300; opacity:0.6;">by Shaswat</span></div>
-                    <div class="tagline">AppNexus : Your Digital Citadel</div>
+                    <div style="letter-spacing:5px; opacity:0.8; font-size:0.9rem;">AppNexus : Your Digital Citadel</div>
                 </div>
-                <button class="nitro-btn" onclick="toggleNitro()">NITRO BOOST</button>
+                <button style="background:rgba(255,0,60,0.1); border:1px solid var(--red); color:var(--red); padding:10px 20px; cursor:pointer;" onclick="toggleNitro()">NITRO</button>
             </header>
             <aside class="glass">
                 <div id="speedo-wrap">
                     <div class="gauge-val" id="speedo">000</div>
                     <div style="font-size:0.8rem; opacity:0.6; letter-spacing:4px;">MACH VELOCITY</div>
                 </div>
-                <div id="terminal" style="flex-grow:1; overflow-y:auto; padding:20px; font-family:'Source Code Pro'; font-size:0.8rem;"></div>
+                <div id="terminal" style="flex-grow:1; overflow-y:auto; padding:20px; font-family:'Source Code Pro'; font-size:0.7rem;"></div>
             </aside>
             <main class="glass" id="viewport"></main>
         </div>
@@ -102,19 +97,17 @@
         let active = 'home', isNitro = false, speed = 0, targetSpeed = 0, audioCtx;
 
         function initCitadel() {
-            const msg = document.getElementById('load-msg');
-            setTimeout(() => { msg.innerText = "DECRYPTING ARCHITECT: SHASWAT MOHANTY..."; }, 1000);
+            initHyperDrive();
             setTimeout(() => { 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('handshake').style.display = 'flex';
-                initHyperDrive();
-            }, 3000);
+            }, 1000);
         }
 
         function playClick() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'square'; osc.frequency.setValueAtTime(isNitro ? 1200 : 800, audioCtx.currentTime);
+            osc.type = 'square'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.05, audioCtx.currentTime); osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
@@ -123,7 +116,7 @@
         function speak(t) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.8; window.speechSynthesis.speak(u); } catch(e){} }
 
         function boot() {
-            playClick(); speak("Welcome Shaswat. Systems authorized.");
+            playClick(); speak("Welcome Shaswat.");
             document.getElementById('handshake').style.display='none';
             document.getElementById('ui-wrapper').style.display='block';
             setTimeout(()=>document.getElementById('ui-wrapper').style.opacity='1', 100);
@@ -132,20 +125,20 @@
 
         function toggleNitro() {
             playClick(); isNitro = !isNitro; document.body.classList.toggle('nitro');
-            if(isNitro) { speak("Nitro engaged."); log("CORE OVERCLOCK: 400%"); }
+            if(isNitro) { speak("Nitro engaged."); log("OVERCLOCK: 400%"); }
         }
 
         let canvas, ctx, particles = [];
         function initHyperDrive() {
             canvas = document.getElementById('nebula-canvas'); ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            for(let i=0; i<200; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*canvas.width, len:Math.random()*50});
+            for(let i=0; i<150; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*canvas.width, len:Math.random()*50});
             draw();
             window.addEventListener('mousemove', (e) => {
                 targetSpeed = Math.abs(e.movementX + e.movementY) * 2;
                 if(active === 'home') {
                     const g = document.querySelector('.grid');
-                    if(g) g.style.transform = `rotateY(${(window.innerWidth/2-e.clientX)/25}deg) rotateX(${-(window.innerHeight/2-e.clientY)/25}deg)`;
+                    if(g) g.style.transform = `rotateY(${(window.innerWidth/2-e.clientX)/35}deg) rotateX(${-(window.innerHeight/2-e.clientY)/35}deg)`;
                 }
             });
         }
@@ -154,7 +147,8 @@
             ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
             speed += (targetSpeed - speed) * 0.1;
             let mach = isNitro ? (speed + 450) : speed;
-            document.getElementById('speedo').innerText = Math.floor(mach).toString().padStart(3, '0');
+            const sElem = document.getElementById('speedo');
+            if(sElem) sElem.innerText = Math.floor(mach).toString().padStart(3, '0');
             targetSpeed *= 0.95;
 
             particles.forEach(p => {
@@ -163,30 +157,26 @@
                 const py = (p.y - canvas.height/2) * (canvas.width/p.z) + canvas.height/2;
                 const s = (1 - p.z/canvas.width);
                 ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--p');
-                ctx.lineWidth = s * 5; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + (s*p.len*(isNitro?15:3)), py); ctx.stroke();
+                ctx.lineWidth = s * 4; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + (s*p.len*(isNitro?15:3)), py); ctx.stroke();
             }); requestAnimationFrame(draw);
         }
 
         function log(m) {
-            const t = document.getElementById('terminal'), d = document.createElement('div');
-            d.className = 'log-ln'; d.innerHTML = `> ${m}`; t.prepend(d);
+            const t = document.getElementById('terminal');
+            if(t) { const d = document.createElement('div'); d.innerHTML = `> ${m}`; t.prepend(d); }
         }
 
-        function navigate(id) { 
-            playClick(); active = id; render(); 
-            if(id === 'apex') speak("Architect Shaswat Mohanty verified.");
-        }
+        function navigate(id) { playClick(); active = id; render(); }
 
         function render() {
             const v = document.getElementById('viewport');
-            log(`SYNC_DATA: ${active.toUpperCase()}`);
+            log(`UPLINK: ${active.toUpperCase()}`);
             if(active === 'home') {
-                document.body.style.setProperty('--p', isNitro ? '#ff003c' : '#00f2ff');
-                v.innerHTML = `<div class="grid">${nodes.map(n => `<div class="card" onclick="navigate('${n.id}')"><span style="font-size:5rem;display:block;margin-bottom:20px;color:${n.color}">${n.icon}</span><div style="font-size:1.8rem;font-weight:900;color:${n.color}">${n.name}</div><div style="font-size:0.8rem;opacity:0.6;margin-top:10px;">OPEN_${n.label}</div></div>`).join('')}</div>`;
+                v.innerHTML = `<div class="grid">${nodes.map(n => `<div class="card" onclick="navigate('${n.id}')"><span style="font-size:4rem;display:block;margin-bottom:20px;color:${n.color}">${n.icon}</span><div style="font-size:1.5rem;font-weight:900;color:${n.color}">${n.name}</div></div>`).join('')}</div>`;
             } else {
-                const n = nodes.find(x => x.id === active); document.body.style.setProperty('--p', n.color);
-                let content = active === 'apex' ? `<div style="font-size:2.5rem;font-weight:900;text-align:center;line-height:1.4;">DESIGNED AND CREATED<br>BY<br>SHASWAT MOHANTY</div>` : `<div class="viewport-3d"><div class="reactor"></div></div><h1 style="font-size:5rem;text-shadow:0 0 50px ${n.color};">${n.name}</h1><a href="${n.link}" target="_blank" class="open-btn" style="border-color:${n.color};color:${n.color}">OPEN ${n.label}</a>`;
-                v.innerHTML = `<a href="#" class="back-btn" onclick="navigate('home')">BACK</a><div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; transform-style:preserve-3d;">${content}</div>`;
+                const n = nodes.find(x => x.id === active);
+                let content = active === 'apex' ? `<div style="font-size:2rem;font-weight:900;text-align:center;">DESIGNED BY<br>SHASWAT MOHANTY</div>` : `<div class="viewport-3d"><div class="reactor"></div></div><h1 style="font-size:3rem;margin-bottom:20px;">${n.name}</h1><a href="${n.link}" target="_blank" class="open-btn" style="border-color:${n.color};color:${n.color}">OPEN</a>`;
+                v.innerHTML = `<a href="#" class="back-btn" onclick="navigate('home')">BACK</a><div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">${content}</div>`;
             }
         }
     </script>
