@@ -3,169 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyro's | APEX V9.4 SONIC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Source+Code+Pro:wght@300;700&display=swap" rel="stylesheet">
+    <title>SKYRO APEX V10 | GOD-TIER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;700&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00f2ff; --bg: #010409; --glow: 0 0 30px rgba(0, 242, 255, 0.6); }
-        body.theme-skyro { --primary: #00ffff; --bg: #00050a; }
-        body.theme-mk3 { --primary: #00f2ff; --bg: #000a12; }
-        body.theme-mk5 { --primary: #ff0a2f; --bg: #0a0000; }
-        body.theme-mk7 { --primary: #ff5500; --bg: #0a0400; }
-        body.theme-mk42 { --primary: #ffaa00; --bg: #0a0800; }
-        body.theme-mk50 { --primary: #b300ff; --bg: #05000a; }
-        body.theme-mk85 { --primary: #ffffff; --bg: #000000; }
+        :root { --p: #00f2ff; --bg: #00050a; --glow: 0 0 25px rgba(0, 242, 255, 0.5); }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+        body, html { background: var(--bg); color: var(--p); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; perspective: 1500px; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { background: var(--bg); color: var(--primary); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; perspective: 1200px; transition: background 0.5s; }
+        /* NEURAL HANDSHAKE & BOOT */
+        #handshake { position: fixed; inset: 0; background: #000; z-index: 50000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .h-btn { font-family: 'Orbitron'; font-size: 1.8rem; color: #0f0; border: 4px double #0f0; padding: 30px 60px; background: rgba(0,255,0,0.05); text-shadow: 0 0 15px #0f0; box-shadow: 0 0 30px rgba(0,255,0,0.2), inset 0 0 30px rgba(0,255,0,0.2); animation: pulse 1.5s infinite; transition: 0.3s; }
+        .h-btn:hover { background: #0f0; color: #000; box-shadow: 0 0 60px #0f0; transform: scale(1.1); }
+        #boot { position: fixed; inset: 0; background: #000; z-index: 40000; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Source Code Pro'; }
+        .b-bar { width: 400px; height: 4px; background: rgba(0,255,0,0.1); margin-top: 20px; border-radius: 4px; overflow: hidden; }
+        .b-fill { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 20px #0f0; }
 
-        /* BOOT & HUD */
-        #handshake { position: fixed; width: 100%; height: 100%; background: #000; z-index: 30000; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; }
-        .handshake-btn { font-family: 'Orbitron'; font-size: 2rem; color: #0f0; border: 2px solid #0f0; padding: 20px 40px; text-shadow: 0 0 15px #0f0; box-shadow: inset 0 0 20px #0f0, 0 0 20px #0f0; animation: pulseCore 2s infinite alternate; }
-        #boot-screen { position: fixed; width: 100%; height: 100%; background: #000; z-index: 20000; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Source Code Pro'; color: #0f0; }
-        .boot-bar { width: 600px; height: 2px; background: rgba(0,255,0,0.2); margin-top: 20px; }
-        .boot-fill { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 20px #0f0; }
-        #particle-engine { position: fixed; width: 100%; height: 100%; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
+        /* THE CHASSIS */
+        #app { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: 90px 1fr; height: 100vh; padding: 25px; gap: 20px; opacity: 0; transition: 1.5s; z-index: 10; position: relative; }
+        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--p); background: rgba(0,20,40,0.4); backdrop-filter: blur(15px); padding: 0 40px; box-shadow: var(--glow); }
+        .logo { font-family: 'Orbitron'; font-size: 2.8rem; font-weight: 900; letter-spacing: 15px; text-shadow: var(--glow); }
+        
+        aside { background: rgba(0,0,0,0.8); border: 1px solid var(--p); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(10px); }
+        #log { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.75rem; color: var(--p); }
+        .log-e { border-left: 2px solid var(--p); padding-left: 10px; margin-bottom: 8px; animation: l-in 0.3s ease-out; }
 
-        /* LAYOUT */
-        #app { position: relative; z-index: 10; display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 80px 1fr; height: 100vh; padding: 20px; gap: 20px; opacity: 0; transition: opacity 1s; }
-        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); padding: 0 30px; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
-        .logo { font-family: 'Orbitron'; font-size: 2.5rem; letter-spacing: 12px; text-shadow: var(--glow); font-weight: 900; }
-        .terminal { background: rgba(0,0,0,0.8); border: 1px solid var(--primary); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(10px); }
-        #log-stream { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.8rem; display: flex; flex-direction: column; gap: 10px; }
-        .log-entry { border-left: 3px solid var(--primary); padding-left: 10px; animation: slideIn 0.2s; }
-        main { border: 1px solid var(--primary); background: rgba(0,0,0,0.6); padding: 40px; position: relative; overflow-y: auto; backdrop-filter: blur(10px); }
+        main { border: 1px solid var(--p); background: rgba(0,10,20,0.3); position: relative; overflow: hidden; backdrop-filter: blur(5px); }
 
-        /* CARDS & BUTTONS */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; perspective: 2000px; padding: 20px; }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid var(--primary); padding: 30px; cursor: pointer; transform-style: preserve-3d; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .card:hover { transform: translateZ(50px) scale(1.05); background: rgba(0,0,0,0.9); box-shadow: 0 30px 60px rgba(0,0,0,0.9), var(--glow); }
-        .card-title { font-family: 'Orbitron'; font-size: 2rem; margin: 15px 0; font-weight: 900; text-shadow: var(--glow); transform: translateZ(30px); }
-        .btn { background: #000; border: 2px solid var(--primary); color: var(--primary); padding: 15px 40px; font-family: 'Orbitron'; cursor: pointer; transition: 0.2s; text-transform: uppercase; pointer-events: auto; font-weight: 900; margin-top:10px; }
-        .btn:hover { background: var(--primary); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
-        .btn-yt { border-color: #ff0000; color: #ff0000; } .btn-ps { border-color: #00ffcc; color: #00ffcc; }
+        /* 3D CARD GRID */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px; height: 100%; overflow-y: auto; }
+        .card { background: rgba(0, 242, 255, 0.03); border: 1px solid rgba(0, 242, 255, 0.3); padding: 30px; position: relative; transform-style: preserve-3d; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .card:hover { transform: translateZ(50px) rotateX(10deg) rotateY(10deg); background: rgba(0, 242, 255, 0.1); border-color: var(--p); box-shadow: var(--glow); }
+        .card-icon { width: 80px; height: 80px; margin-bottom: 20px; position: relative; transform-style: preserve-3d; transition: 0.5s; }
+        .card:hover .card-icon { transform: rotateY(360deg); }
+        .card-title { font-family: 'Orbitron'; font-size: 1.6rem; font-weight: 900; margin-bottom: 10px; }
 
-        /* DASHBOARD VIEWS */
-        .dashboard-view { display: flex; width: 100%; height: 100%; position: relative; animation: bootUp 0.8s; }
-        .center-stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; transform-style: preserve-3d; z-index: 5; pointer-events: none; }
-        .hud-panels { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-        .data-box { background: rgba(0,0,0,0.9); border: 2px solid var(--primary); padding: 30px; font-family: 'Source Code Pro'; font-size: 1.1rem; text-shadow: var(--glow); box-shadow: var(--glow); }
+        /* DASHBOARD ANIMATIONS */
+        #visual-core { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .center-obj { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); transform-style: preserve-3d; }
+        .hud-overlay { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: flex-end; padding: 40px; pointer-events: none; z-index: 100; }
+        
+        /* THE BEAST MODE BUTTONS */
+        .beast-btn { background: #000; border: 2px solid var(--p); color: var(--p); padding: 20px 50px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 3px; pointer-events: auto; transition: 0.3s; margin-top: 15px; text-decoration: none; display: inline-block; text-align: center; }
+        .beast-btn:hover { background: var(--p); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
+        .btn-yt { border-color: #ff0000; color: #ff0000; } .btn-yt:hover { background: #ff0000; color: #fff; }
+        .btn-ps { border-color: #00ff66; color: #00ff66; } .btn-ps:hover { background: #00ff66; color: #000; }
+        .btn-pg { border-color: #ffaa00; color: #ffaa00; } .btn-pg:hover { background: #ffaa00; color: #000; }
 
-        /* 3D MODELS */
-        .mk3-reactor { width: 100%; height: 100%; transform-style: preserve-3d; animation: spinXY 10s linear infinite; }
-        .mk3-r { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 3px solid var(--primary); transform: translate(-50%, -50%); box-shadow: var(--glow); }
-        .mk5-core { transform-style: preserve-3d; animation: spinY 10s linear infinite; width: 100%; height: 100%; position: absolute; }
-        .mk5-s { position: absolute; width: 80px; height: 80px; background: rgba(255,10,47,0.1); border: 2px solid var(--primary); animation: explode 4s infinite alternate; }
-        #mech-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 20; }
+        /* GRAPHIC MODELS */
+        .torus { width: 300px; height: 300px; border: 10px double var(--p); border-radius: 50%; animation: rot 5s infinite linear; position: relative; box-shadow: var(--glow), inset var(--glow); }
+        .fractal { width: 100px; height: 100px; background: rgba(255,0,0,0.2); border: 2px solid #f00; position: absolute; animation: explode 3s infinite alternate; }
 
-        @keyframes pulseCore { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
-        @keyframes spinXY { 100% { transform: rotate3d(1, 1, 1, 360deg); } }
-        @keyframes explode { 0% { transform: translate(-50%, -50%) translateZ(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) translateZ(var(--dz)) rotateX(360deg); opacity: 0.2; } }
-        @keyframes bootUp { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes rot { from { transform: rotateX(70deg) rotateZ(0); } to { transform: rotateX(70deg) rotateZ(360deg); } }
+        @keyframes pulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+        @keyframes l-in { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes explode { 0% { transform: scale(1) rotate(0); } 100% { transform: scale(2.5) rotate(180deg); opacity: 0; } }
     </style>
 </head>
-<body>
-    <div id="handshake" onclick="startBoot()"><div class="handshake-btn">[ INITIATE NEURAL HANDSHAKE ]</div><div style="color:#0f0; margin-top:20px; font-family:'Source Code Pro';">VERIFYING BIOMETRICS...</div></div>
-    <div id="boot-screen"><div style="font-size:2rem; letter-spacing:10px; color:#0f0;" id="boot-txt">ESTABLISHING SONIC UPLINK...</div><div class="boot-bar"><div class="boot-fill" id="b-fill"></div></div></div>
-    
-    <canvas id="particle-engine"></canvas>
+<body onload="initParticles()">
+
+    <div id="handshake" onclick="startBoot()">
+        <div class="h-btn">INITIATE BEAST MODE</div>
+        <div style="margin-top:20px; font-family:'Source Code Pro'; color:#0f0;">AUTHORIZATION: SKYRO APEX</div>
+    </div>
+
+    <div id="boot">
+        <div id="boot-status" style="color:#0f0; font-size:1.5rem; letter-spacing:5px;">OPTIMIZING 3D ENGINE...</div>
+        <div class="b-bar"><div class="b-fill" id="b-fill"></div></div>
+    </div>
+
+    <canvas id="bg-canvas" style="position:fixed; inset:0; z-index:0;"></canvas>
 
     <div id="app">
-        <header><div class="logo">SKYRO <span style="font-size: 1.2rem; opacity: 0.5;">// SONIC V9.4</span></div><div id="status-box" style="color:#0f0;">VOICE: STANDBY</div></header>
-        <aside class="terminal"><div id="log-stream"></div></aside>
-        <main id="router-view"></main>
+        <header>
+            <div class="logo">SKYRO APEX <span style="font-size: 1rem; opacity: 0.5;">// V10 GOD-MODE</span></div>
+            <div style="text-align:right; font-family:'Source Code Pro'; font-size:0.8rem;">ENGINE: VOLUMETRIC_S10<br>STATUS: UNLEASHED</div>
+        </header>
+
+        <aside>
+            <div style="font-family:'Orbitron'; border-bottom:1px solid var(--p); margin-bottom:15px; padding-bottom:5px;">SYSTEM_LOGS</div>
+            <div id="log"></div>
+        </aside>
+
+        <main id="view-port"></main>
     </div>
 
     <script>
-        const suits = [
-            { id: 'skyro', name: 'PROJECT: SKYRO', class: 'VOLUMETRIC', desc: '3D Particle Exoskeleton.' },
-            { id: 'mk3', name: 'MARK III', class: 'MEDIA UPLINK', desc: 'YouTube Database Access.' },
-            { id: 'mk5', name: 'MARK V', class: 'APP UPLINK', desc: 'Play Store Mainframe.' },
-            { id: 'mk7', name: 'MARK VII', class: 'GYRO-LASER', desc: 'Targeting Array.' },
-            { id: 'mk42', name: 'MARK XLII', class: 'SWARM', desc: 'Magnetic Shards.' },
-            { id: 'mk50', name: 'MARK L', class: 'LIQUID', desc: 'Nanotech Morph.' },
-            { id: 'mk85', name: 'MARK LXXXV', class: 'INFINITY', desc: 'Cosmic Folder.' }
+        const cards = [
+            { id: 'skyro', name: 'PROJECT SKYRO', icon: '⚛', color: '#00f2ff', desc: 'Volumetric 3D Exoskeleton' },
+            { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', desc: 'Global Media: YouTube' },
+            { id: 'mk4', name: 'MARK 4', icon: '❖', color: '#00ff66', desc: 'App Mainframe: PlayStore' },
+            { id: 'mk7', name: 'MARK 7', icon: '⚔', color: '#ffaa00', desc: 'Tactical Combat: PUBG' },
+            { id: 'mk50', name: 'MARK 50', icon: '💧', color: '#b300ff', desc: 'Nanotech Fluidics' },
+            { id: 'mk85', name: 'MARK 85', icon: '♾', color: '#ffffff', desc: 'Dimensional Singularity' },
+            { id: 'mk1', name: 'MARK 1', icon: '⚙', color: '#888888', desc: 'Legacy Hardware' }
         ];
 
-        let activeRoute = 'home', sysInit = false;
-        const canvas = document.getElementById('particle-engine'), ctx = canvas.getContext('2d');
-        let mechParticles = [], mechAngle = 0;
+        let activeId = 'home';
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
 
-        /* VOICE ENGINE V9.4 */
-        function speak(text) {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel(); // Clear queue
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.pitch = 0.85; 
-            utterance.rate = 1.0;
-            utterance.volume = 1.0;
-            
-            // Critical Fix: Force browser to honor the request
-            window.speechSynthesis.speak(utterance);
-            logAction(`AUDIO_OUT: "${text}"`);
+        function speak(t) {
+            try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.7; u.rate=1.1; window.speechSynthesis.speak(u); } catch(e){}
         }
 
         function startBoot() {
-            // First interaction: Unlock voice immediately
-            speak("Welcome Skyro."); 
-            
-            document.getElementById('handshake').style.display = 'none';
-            document.getElementById('boot-screen').style.display = 'flex';
-            
-            let w = 0;
-            const bootInt = setInterval(() => {
-                w += Math.random()*20; if(w>100) w=100;
+            speak("Welcome Boss. Unleashing Apex Beast Mode.");
+            document.getElementById('handshake').style.display='none';
+            document.getElementById('boot').style.display='flex';
+            let w=0;
+            const int = setInterval(() => {
+                w += Math.random()*15;
                 document.getElementById('b-fill').style.width = w+'%';
-                if(w>=100) {
-                    clearInterval(bootInt);
-                    speak("Mainframe operational. Voice uplink stable.");
-                    setTimeout(() => {
-                        document.getElementById('boot-screen').style.display = 'none';
-                        document.getElementById('app').style.opacity = '1';
-                        initSystem();
-                    }, 500);
-                }
-            }, 150);
+                if(w>40) document.getElementById('boot-status').innerText = "CALIBRATING 3D SHADERS...";
+                if(w>80) document.getElementById('boot-status').innerText = "ENGAGING VOLUMETRIC CORE...";
+                if(w>=100) { clearInterval(int); document.getElementById('boot').style.display='none'; document.getElementById('app').style.opacity='1'; renderView(); }
+            }, 100);
         }
 
-        function initSystem() {
-            sysInit = true; resize();
-            window.addEventListener('resize', resize);
-            window.addEventListener('hashchange', handleRouting);
-            handleRouting();
-            logAction("SONIC CORE V9.4 ONLINE");
-            document.getElementById('status-box').innerText = "VOICE: ACTIVE";
+        function log(m) {
+            const l = document.getElementById('log');
+            const e = document.createElement('div');
+            e.className = 'log-e';
+            e.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}`;
+            l.prepend(e);
         }
 
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-
-        function logAction(msg) {
-            const s = document.getElementById('log-stream'), e = document.createElement('div');
-            e.className = 'log-entry'; e.innerHTML = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
-            s.prepend(e);
+        function initParticles() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            dots = [];
+            for(let i=0; i<200; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*canvas.width, s: Math.random()*2});
+            animate();
         }
 
-        function navigate(path) { window.location.hash = path; }
+        function animate() {
+            ctx.fillStyle = 'rgba(0,5,10,0.2)';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            const color = getComputedStyle(document.body).getPropertyValue('--p').trim();
+            dots.forEach(d => {
+                d.z -= 5; if(d.z <= 0) d.z = canvas.width;
+                const x = (d.x - canvas.width/2) * (canvas.width/d.z) + canvas.width/2;
+                const y = (d.y - canvas.height/2) * (canvas.width/d.z) + canvas.height/2;
+                const sz = (1 - d.z/canvas.width) * 5;
+                ctx.beginPath(); ctx.arc(x,y,sz,0,Math.PI*2); ctx.fillStyle = color; ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
 
-        function handleRouting() {
-            activeRoute = window.location.hash.replace('#', '') || 'home';
-            const view = document.getElementById('router-view');
-            
-            if (activeRoute === 'home') {
-                view.innerHTML = `<div class="grid">${suits.map(s => `<div class="card" onclick="navigate('${s.id}')"><div class="card-title">${s.name}</div><div>${s.class}</div></div>`).join('')}</div>`;
+        function navigate(id) { activeId = id; renderView(); }
+
+        function renderView() {
+            const v = document.getElementById('view-port');
+            log(`SWITCHING_UPLINK: ${activeId.toUpperCase()}`);
+            if(activeId === 'home') {
+                v.innerHTML = `<div class="grid">${cards.map(c => `
+                    <div class="card" onclick="navigate('${c.id}')">
+                        <div class="card-icon" style="color:${c.color}; font-size:4rem; text-shadow: 0 0 20px ${c.color};">${c.icon}</div>
+                        <div class="card-title" style="color:${c.color}">${c.name}</div>
+                        <div style="font-size:0.9rem; opacity:0.7;">${c.desc}</div>
+                    </div>`).join('')}</div>`;
+                document.body.style.setProperty('--p', '#00f2ff');
             } else {
-                const suit = suits.find(s => s.id === activeRoute);
-                speak(`Deploying ${suit.name}`);
+                const c = cards.find(x => x.id === activeId);
+                document.body.style.setProperty('--p', c.color);
+                speak(`Deploying ${c.name}`);
                 
-                let h = '';
-                if(activeRoute === 'mk3') h = `<div class="mk3-reactor"><div class="mk3-r" style="width:300px; height:300px;"></div><div class="mk3-r" style="width:150px; height:150px; border-style:dashed;"></div></div>`;
-                else if(activeRoute === 'mk5') h = `<div class="mk5-core">${Array(15).fill(0).map(()=>`<div class="mk5-s" style="--dx:${(Math.random()-0.5)*400}px; --dy:${(Math.random()-0.5)*400}px; --dz:${(Math.random()-0.5)*400}px;"></div>`).join('')}</div>`;
-                else h = `<div style="font-size:3rem; border:2px solid;">${suit.name} MODEL ACTIVE</div>`;
+                let graphic = `<div class="center-obj"><div class="torus"></div></div>`;
+                if(activeId === 'mk3') graphic = `<div class="center-obj"><div class="torus" style="border-color:#f00; box-shadow:0 0 50px #f00;"></div><div style="position:absolute; font-size:10rem; color:#f00; text-shadow:0 0 50px #f00;">▶</div></div>`;
+                if(activeId === 'mk4') graphic = `<div class="center-obj"><div class="torus" style="border-color:#0f6; box-shadow:0 0 50px #0f6;"></div><div style="position:absolute; font-size:10rem; color:#0f6; text-shadow:0 0 50px #0f6;">❖</div></div>`;
+                if(activeId === 'mk7') graphic = `<div class="center-obj"><div class="torus" style="border-color:#fa0; box-shadow:0 0 50px #fa0;"></div><div style="position:absolute; font-size:10rem; color:#fa0; text-shadow:0 0 50px #fa0;">⚔</div></div>`;
 
-                let btns = `<button class="btn" onclick="navigate('home')">ARCHIVE</button>`;
-                if(activeRoute === 'mk3') btns = `<button class="btn btn-yt" onclick="window.location.href='https://youtube.com'">OPEN YOUTUBE</button><br>` + btns;
-                if(activeRoute === 'mk5') btns = `<button class="btn btn-ps" onclick="window.location.href='https://play.google.com'">OPEN PLAY STORE</button><br>` + btns;
+                let buttons = `<a href="#" class="beast-btn" onclick="navigate('home')">CLOSE SYSTEM</a>`;
+                if(activeId === 'mk3') buttons = `<a href="https://youtube.com" target="_blank" class="beast-btn btn-yt">OPEN YOUTUBE MAIN FRAME</a><br>` + buttons;
+                if(activeId === 'mk4') buttons = `<a href="https://play.google.com" target="_blank" class="beast-btn btn-ps">OPEN GOOGLE PLAY MATRIX</a><br>` + buttons;
+                if(activeId === 'mk7') buttons = `<a href="https://www.pubgmobile.com" target="_blank" class="beast-btn btn-pg">OPEN TACTICAL COMBAT</a><br>` + buttons;
 
-                view.innerHTML = `<div class="dashboard-view"><div class="center-stage">${h}</div><div class="hud-panels"><div class="data-box"><h2>${suit.name}</h2></div><div class="data-box">${btns}</div></div></div>`;
+                v.innerHTML = `
+                    <div class="dashboard-view" style="width:100%; height:100%;">
+                        ${graphic}
+                        <div class="hud-overlay">
+                            <div class="data-box" style="border-left:5px solid var(--p); padding:20px; background:rgba(0,0,0,0.8);">
+                                <h1 style="font-family:'Orbitron'; font-size:4rem;">${c.name}</h1>
+                                <p>> UPLINK STATUS: SECURE</p>
+                                <p>> GRAPHIC CORE: VOLUMETRIC</p>
+                            </div>
+                            <div style="text-align:right;">
+                                ${buttons}
+                            </div>
+                        </div>
+                    </div>`;
             }
         }
     </script>
