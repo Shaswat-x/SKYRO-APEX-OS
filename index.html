@@ -3,93 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SKYRO APEX V12.2 | SHASWAT EDITION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <title>SKYRO V13.1 | AppNexus Citadel Heartbeat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #00f2ff; --bg: #000; --red: #ff003c; --glow: 0 0 25px rgba(0, 242, 255, 0.6); }
+        :root { --p: #00f2ff; --bg: #000208; --red: #ff003c; --glow: 0 0 35px rgba(0, 242, 255, 0.6); }
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
-        body, html { background: var(--bg); color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 1000px; touch-action: manipulation; }
+        body, html { background: var(--bg); color: var(--p); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; perspective: 2000px; touch-action: manipulation; }
+
+        /* HEARTBEAT ANIMATION */
+        @keyframes heartbeat { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.7; filter: brightness(1.5); } }
+        .heartbeat { animation: heartbeat 2s infinite ease-in-out; }
 
         /* BOOT INTERFACE */
-        #handshake { position: fixed; inset: 0; z-index: 5000; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; }
-        .hand-scanner { width: 180px; height: 180px; border: 2px solid #0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: pulse 2s infinite; cursor: pointer; }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: #0f0; top: 0; animation: scanLine 2s infinite ease-in-out; box-shadow: 0 0 15px #0f0; }
+        #handshake { position: fixed; inset: 0; z-index: 10000; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; }
+        .hand-scanner { width: 220px; height: 220px; border: 3px solid #0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: pulse 2s infinite; cursor: pointer; background: radial-gradient(circle, rgba(0,255,0,0.1), transparent); }
+        .scan-line { position: absolute; width: 100%; height: 3px; background: #0f0; top: 0; animation: scanLine 2s infinite ease-in-out; box-shadow: 0 0 20px #0f0; }
 
-        /* HUD ELEMENTS */
-        #ui-wrapper { position: relative; width: 100%; height: 100%; z-index: 10; display: none; opacity: 0; transition: 1.5s; }
-        .glass { background: rgba(0, 20, 40, 0.5); border: 1px solid var(--p); backdrop-filter: blur(15px); border-radius: 10px; }
+        /* UI WRAPPER & GLASSMORPHISM */
+        #ui-wrapper { position: relative; width: 100%; height: 100%; z-index: 10; display: none; opacity: 0; transition: 2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass { background: rgba(0, 20, 40, 0.4); border: 1px solid rgba(0, 242, 255, 0.2); backdrop-filter: blur(25px); border-radius: 15px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
 
-        /* LAYOUT */
-        #container { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 70px 1fr; height: 100vh; padding: 15px; gap: 15px; }
-        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: var(--glow); }
-        .logo-text { font-size: 1.5rem; font-weight: 900; letter-spacing: 5px; }
+        /* GRID LAYOUT */
+        #container { display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 120px 1fr; height: 100vh; padding: 20px; gap: 20px; }
+        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+        .branding { display: flex; flex-direction: column; }
+        .logo-text { font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 900; letter-spacing: 8px; text-shadow: var(--glow); }
+        .tagline { font-family: 'Rajdhani'; font-size: 1.1rem; letter-spacing: 5px; opacity: 0.8; font-weight: 500; text-transform: uppercase; margin-top: 5px; color: var(--p); }
         
         aside { display: flex; flex-direction: column; overflow: hidden; }
-        #terminal { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.7rem; padding: 10px; }
-        .log-ln { border-left: 2px solid var(--p); padding-left: 10px; margin-bottom: 5px; animation: slideR 0.3s; }
+        #terminal { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.75rem; padding: 15px; scrollbar-width: none; }
+        .log-ln { border-left: 2px solid var(--p); padding-left: 12px; margin-bottom: 8px; animation: slideR 0.3s; color: rgba(0, 242, 255, 0.8); }
 
         main { position: relative; overflow-y: auto; scrollbar-width: none; }
-        main::-webkit-scrollbar { display: none; }
 
-        /* GRID SYSTEM */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 15px; }
-        .card { padding: 20px; text-align: center; transition: 0.4s; transform-style: preserve-3d; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 12px; }
-        .card:hover { transform: scale(1.03) translateZ(20px); background: rgba(0, 242, 255, 0.15); border-color: var(--p); box-shadow: var(--glow); }
-        .icon-3d { font-size: 3rem; margin-bottom: 10px; display: block; animation: floating 3s infinite alternate; }
+        /* 3D PARALLAX CARDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; padding: 20px; transform-style: preserve-3d; transition: transform 0.1s; }
+        .card { padding: 35px; text-align: center; transition: 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); transform-style: preserve-3d; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,242,255,0.05); }
+        .card:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--p); box-shadow: var(--glow); transform: translateZ(80px); }
+        .icon-3d { font-size: 4.5rem; margin-bottom: 15px; display: block; animation: floating 4s infinite alternate ease-in-out; text-shadow: 0 0 30px currentColor; }
 
-        /* NAVIGATION */
-        .back-btn { position: absolute; top: 15px; left: 15px; padding: 10px 20px; background: rgba(0,0,0,0.9); border: 2px solid var(--p); color: var(--p); font-family: 'Orbitron'; font-weight: 900; z-index: 1000; border-radius: 5px; }
-        .destruct-btn { background: rgba(255,0,0,0.1); border: 1px solid var(--red); color: var(--red); font-size: 0.65rem; padding: 10px; margin-top: 10px; width: 100%; font-weight: 900; border-radius: 5px; }
-        #shatter { position: fixed; inset: 0; background: #fff; z-index: 99999; display: none; }
+        /* NAVIGATION BUTTONS */
+        .back-btn { position: absolute; top: 25px; left: 25px; padding: 12px 35px; background: rgba(0,0,0,0.9); border: 2px solid var(--p); color: var(--p); font-family: 'Orbitron'; font-weight: 900; z-index: 1000; border-radius: 50px; text-decoration: none; box-shadow: var(--glow); transition: 0.3s; }
+        .back-btn:hover { background: var(--p); color: #000; }
+        .destruct-btn { background: rgba(255,0,0,0.1); border: 1px solid var(--red); color: var(--red); font-size: 0.7rem; padding: 14px; margin-top: 10px; width: 100%; font-weight: 900; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .destruct-btn:hover { background: var(--red); color: #fff; box-shadow: 0 0 20px var(--red); }
+        #shatter { position: fixed; inset: 0; background: #fff; z-index: 20000; display: none; }
 
-        /* 3D VIEWPORT */
-        .center-stage { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .viewport-3d { width: 250px; height: 250px; transform-style: preserve-3d; margin-bottom: 30px; }
-        .reactor { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--p); animation: spin3D 4s linear infinite; box-shadow: var(--glow), inset var(--glow); }
-        .radar { width: 100%; height: 100%; border: 2px solid var(--p); border-radius: 50%; position: relative; overflow: hidden; }
-        .radar-beam { position: absolute; width: 50%; height: 2px; background: var(--p); top: 50%; left: 50%; transform-origin: left center; animation: radarScan 2s linear infinite; }
+        /* HERO ANIMATIONS */
+        .center-stage { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; transform-style: preserve-3d; }
+        .viewport-3d { width: 350px; height: 350px; transform-style: preserve-3d; position: relative; margin-bottom: 40px; }
+        
+        .reactor { width: 100%; height: 100%; border-radius: 50%; border: 8px solid var(--p); animation: spin3D 6s linear infinite; box-shadow: var(--glow), inset var(--glow); position: absolute; }
+        .reactor::after { content: ''; position: absolute; inset: 30px; border: 4px dashed var(--p); border-radius: 50%; animation: spin3D 3s linear infinite reverse; }
+        
+        .radar { width: 100%; height: 100%; border: 3px solid var(--p); border-radius: 50%; position: relative; overflow: hidden; background: radial-gradient(circle, rgba(0,242,255,0.1), transparent); }
+        .radar-beam { position: absolute; width: 50%; height: 6px; background: linear-gradient(to right, var(--p), transparent); top: 50%; left: 50%; transform-origin: left center; animation: radarScan 2s linear infinite; box-shadow: 0 0 20px var(--p); }
 
-        /* ACTION BUTTONS */
-        .action-area { text-align: center; }
-        .b-btn { display: inline-block; padding: 15px 40px; border: 2px solid var(--p); background: transparent; color: var(--p); text-decoration: none; font-weight: 900; letter-spacing: 2px; font-size: 1rem; border-radius: 40px; transition: 0.3s; margin-top: 10px; }
-        .b-btn:hover { background: var(--p); color: #000; box-shadow: var(--glow); }
+        .b-btn { display: inline-block; padding: 20px 60px; border: 2px solid var(--p); background: transparent; color: var(--p); text-decoration: none; font-weight: 900; letter-spacing: 5px; font-size: 1.2rem; border-radius: 50px; transition: 0.4s; box-shadow: var(--glow); }
+        .b-btn:hover { background: var(--p); color: #000; transform: scale(1.1) translateY(-5px); }
 
-        /* ANIMATIONS */
-        @keyframes pulse { 0%, 100% { box-shadow: 0 0 20px #0f0; } 50% { box-shadow: 0 0 50px #0f0; } }
-        @keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
-        @keyframes floating { from { transform: translateY(0); } to { transform: translateY(-15px); } }
-        @keyframes spin3D { from { transform: rotateY(0) rotateX(30deg); } to { transform: rotateY(360deg) rotateX(30deg); } }
-        @keyframes radarScan { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-        @keyframes slideR { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* RESPONSIVE BREAKPOINT */
+        /* MOBILE FIXES */
         @media (max-width: 850px) {
-            #container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 120px; }
+            #container { grid-template-columns: 1fr; grid-template-rows: 100px 1fr 140px; }
             aside { grid-row: 3; }
-            .logo-text { font-size: 1.1rem; }
-            .viewport-3d { width: 180px; height: 180px; }
+            .logo-text { font-size: 1.6rem; letter-spacing: 4px; }
+            .tagline { font-size: 0.8rem; letter-spacing: 3px; }
             .grid { grid-template-columns: 1fr 1fr; }
+            .viewport-3d { width: 220px; height: 220px; }
         }
+
+        /* KEYFRAMES */
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 20px #0f0; } 50% { box-shadow: 0 0 60px #0f0; transform: scale(1.05); } }
+        @keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
+        @keyframes floating { from { transform: translateZ(30px) translateY(0); } to { transform: translateZ(60px) translateY(-25px); } }
+        @keyframes spin3D { from { transform: rotateY(0) rotateX(45deg); } to { transform: rotateY(360deg) rotateX(45deg); } }
+        @keyframes radarScan { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+        @keyframes slideR { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
-<body onload="initSpace()">
+<body onload="initCitadel()">
 
     <div id="handshake" onclick="boot()">
         <div class="hand-scanner"><div class="scan-line"></div></div>
-        <div style="margin-top:15px; color:#0f0; font-family:'Source Code Pro'; font-size:0.8rem;">AUTHENTICATION: SHASWAT ONLY</div>
+        <div style="margin-top:20px; color:#0f0; font-family:'Orbitron'; letter-spacing:3px;">IDENTITY_CHECK: SHASWAT</div>
     </div>
 
     <div id="shatter"></div>
-
-    <canvas id="stars" style="position:fixed; inset:0; z-index:0;"></canvas>
+    <canvas id="nebula" style="position:fixed; inset:0; z-index:0;"></canvas>
 
     <div id="ui-wrapper">
         <div id="container">
-            <header class="glass"><div class="logo-text">SKYRO <span style="font-size:0.7rem; letter-spacing:2px; opacity:0.6;">by Shaswat</span></div><div id="status" style="color:#0f0; font-size:0.7rem;">STATUS: ONLINE</div></header>
+            <header class="glass heartbeat">
+                <div class="branding">
+                    <div class="logo-text">SKYRO | <span style="font-weight:300; opacity:0.6;">by Shaswat</span></div>
+                    <div class="tagline">AppNexus : Your Digital Citadel</div>
+                </div>
+                <div id="status" style="color:#0f0; font-family:'Source Code Pro'; font-size:0.8rem;">ENGINE: APEX_V13.1_FINAL</div>
+            </header>
+
             <aside class="glass">
-                <div id="terminal"></div>
-                <button class="destruct-btn" onclick="destruct()">RED_PROTOCOL</button>
+                <div id="terminal" class="heartbeat"></div>
+                <button class="destruct-btn" onclick="destruct()">INITIATE CORE COLLAPSE</button>
             </aside>
+
             <main class="glass" id="viewport"></main>
         </div>
     </div>
@@ -99,40 +115,52 @@
             { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', link: 'https://youtube.com', label: 'YOUTUBE' },
             { id: 'mk4', name: 'MARK 4', icon: '❖', color: '#00ff66', link: 'https://play.google.com', label: 'PLAY STORE' },
             { id: 'mk5', name: 'MARK 5', icon: '⚔', color: '#ffaa00', link: 'https://www.pubgmobile.com', label: 'PUBG MOBILE' },
-            { id: 'mk50', name: 'MARK 50', icon: '⚡', color: '#b300ff', link: 'https://www.instagram.com', label: 'INSTAGRAM' },
-            { id: 'mk85', name: 'MARK 85', icon: '♾', color: '#ffffff', link: 'https://www.flipkart.com', label: 'FLIPKART' },
+            { id: 'mk50', name: 'MARK 50', icon: '📷', color: '#b300ff', link: 'https://www.instagram.com', label: 'INSTAGRAM' },
+            { id: 'mk85', name: 'MARK 85', icon: '🛒', color: '#ffffff', link: 'https://www.flipkart.com', label: 'FLIPKART' },
             { id: 'mk1', name: 'MARK 1', icon: '🗺', color: '#00f2ff', link: 'https://maps.google.com', label: 'GOOGLE MAPS' },
-            { id: 'skyro', name: 'APEX', icon: '⚛', color: '#00f2ff', link: '#', label: 'VOLUMETRIC' }
+            { id: 'apex', name: 'APEX', icon: '⚛', color: '#00f2ff', link: '#', label: 'VOLUMETRIC' }
         ];
 
         let active = 'home';
-        const stars = document.getElementById('stars'), sctx = stars.getContext('2d');
-        let starArr = [];
+        const canvas = document.getElementById('nebula'), ctx = canvas.getContext('2d');
+        let particles = [];
 
-        function speak(t) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.8; u.rate=1; window.speechSynthesis.speak(u); } catch(e){} }
+        function speak(t) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.75; u.rate=1; window.speechSynthesis.speak(u); } catch(e){} }
 
         function boot() {
-            speak("Welcome, Shaswat. SKYRO systems are now under your command.");
+            speak("Welcome to SKYRO by Shaswat. System Integrity 100%. Accessing the Citadel.");
             document.getElementById('handshake').style.display='none';
             const ui = document.getElementById('ui-wrapper'); ui.style.display='block'; setTimeout(()=>ui.style.opacity='1', 100);
             render();
         }
 
-        function initSpace() {
-            stars.width = window.innerWidth; stars.height = window.innerHeight;
-            for(let i=0; i<150; i++) starArr.push({x:Math.random()*stars.width, y:Math.random()*stars.height, z:Math.random()*stars.width});
-            drawSpace();
+        function initCitadel() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            for(let i=0; i<300; i++) particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, z:Math.random()*canvas.width});
+            drawNebula();
+            
+            // 3D PARALLAX EFFECT
+            window.addEventListener('mousemove', (e) => {
+                if(active === 'home') {
+                    const grid = document.querySelector('.grid');
+                    if(grid) {
+                        const x = (window.innerWidth / 2 - e.clientX) / 30;
+                        const y = (window.innerHeight / 2 - e.clientY) / 30;
+                        grid.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+                    }
+                }
+            });
         }
 
-        function drawSpace() {
-            sctx.fillStyle = '#000'; sctx.fillRect(0,0,stars.width,stars.height);
-            starArr.forEach(s => {
-                s.z -= 2; if(s.z<=0) s.z=stars.width;
-                const px = (s.x - stars.width/2) * (stars.width/s.z) + stars.width/2;
-                const py = (s.y - stars.height/2) * (stars.width/s.z) + stars.height/2;
-                sctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--p');
-                sctx.beginPath(); sctx.arc(px,py, (1-s.z/stars.width)*2, 0, Math.PI*2); sctx.fill();
-            }); requestAnimationFrame(drawSpace);
+        function drawNebula() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => {
+                p.z -= 4; if(p.z<=0) p.z=canvas.width;
+                const px = (p.x - canvas.width/2) * (canvas.width/p.z) + canvas.width/2;
+                const py = (p.y - canvas.height/2) * (canvas.width/p.z) + canvas.height/2;
+                ctx.fillStyle = `rgba(0, 242, 255, ${1 - p.z/canvas.width})`;
+                ctx.beginPath(); ctx.arc(px,py, (1-p.z/canvas.width)*3.5, 0, Math.PI*2); ctx.fill();
+            }); requestAnimationFrame(drawNebula);
         }
 
         function log(m) {
@@ -141,42 +169,49 @@
         }
 
         function destruct() {
-            speak("Self destruction initiated. Goodbye Boss.");
-            document.getElementById('shatter').style.display = 'block';
-            setTimeout(()=>location.reload(), 2000);
+            speak("Shaswat, the Citadel is collapsing. Five seconds to total wipeout.");
+            let count = 5;
+            const timer = setInterval(() => {
+                log(`CRITICAL_CORE_FAILURE: ${count}`); count--;
+                if(count < 0) {
+                    clearInterval(timer);
+                    document.getElementById('shatter').style.display = 'block';
+                    setTimeout(()=>location.reload(), 2000);
+                }
+            }, 1000);
         }
 
         function navigate(id) { active = id; render(); }
 
         function render() {
             const v = document.getElementById('viewport');
-            log(`UPLINK: ${active.toUpperCase()}`);
+            log(`SYSTEM_UPLINK: ${active.toUpperCase()}`);
             
             if(active === 'home') {
                 document.body.style.setProperty('--p', '#00f2ff');
                 v.innerHTML = `<div class="grid">${nodes.map(n => `
                     <div class="card" onclick="navigate('${n.id}')">
                         <span class="icon-3d" style="color:${n.color}">${n.icon}</span>
-                        <div style="font-size:1rem; color:${n.color}">${n.name}</div>
+                        <div style="font-family:'Orbitron'; font-size:1.4rem; color:${n.color}; font-weight:900;">${n.name}</div>
+                        <div style="font-size:0.8rem; opacity:0.6; margin-top:10px; font-family:'Source Code Pro';">ACCESS_${n.label}</div>
                     </div>`).join('')}</div>`;
             } else {
                 const node = nodes.find(n => n.id === active);
                 document.body.style.setProperty('--p', node.color);
-                speak(`Accessing ${node.name}`);
+                speak(`Accessing ${node.name} protocol.`);
 
                 let graphic = `<div class="reactor"></div>`;
                 if(active === 'mk5') graphic = `<div class="radar"><div class="radar-beam"></div></div>`;
+                if(active === 'mk50') graphic = `<div class="reactor" style="border-radius:20%; border-style:dotted; border-width:4px;"></div>`;
+                if(active === 'mk85') graphic = `<div class="reactor" style="animation: spin3D 2s infinite linear; border-width:12px;"></div><div class="reactor" style="inset:40px; border-width:2px; animation: spin3D 8s infinite linear reverse;"></div>`;
 
                 v.innerHTML = `
-                    <button class="back-btn" onclick="navigate('home')">BACK</button>
+                    <a href="#" class="back-btn" onclick="navigate('home')">< ARCHIVE</a>
                     <div class="center-stage">
                         <div class="viewport-3d">${graphic}</div>
-                        <div class="action-area">
-                            <h1 style="font-size:2.5rem; text-shadow:0 0 20px ${node.color}">${node.name}</h1>
-                            <p style="font-size:0.7rem; letter-spacing:3px; margin-bottom:20px;">SYSTEM_${node.label}_ACTIVE</p>
-                            <a href="${node.link}" target="_blank" class="b-btn" style="border-color:${node.color}; color:${node.color}">OPEN ${node.label}</a>
-                            <br><a href="#" class="b-btn" onclick="navigate('home')" style="font-size:0.7rem; border:none;">CLOSE</a>
-                        </div>
+                        <h1 style="font-family:'Orbitron'; font-size:4rem; text-shadow:0 0 50px ${node.color}; font-weight:900;">${node.name}</h1>
+                        <p style="letter-spacing:10px; margin-bottom:40px; opacity:0.7; font-size:1.1rem;">UPLINKING TO ${node.label} DIRECTORY...</p>
+                        <a href="${node.link}" target="_blank" class="b-btn" style="border-color:${node.color}; color:${node.color}">INITIATE UPLINK</a>
                     </div>`;
             }
         }
