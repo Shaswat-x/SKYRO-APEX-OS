@@ -24,7 +24,7 @@
         #container { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: 150px 1fr; height: 100vh; padding: 25px; gap: 25px; }
         @media (max-width: 1000px) {
             #container { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; padding: 15px; }
-            aside { grid-row: 3; height: 260px; }
+            aside { grid-row: 3; height: 260px; overflow-y: auto; }
             .logo-text { font-size: 1.8rem !important; }
             .grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
             .action-btns { flex-direction: column; gap: 5px; }
@@ -50,6 +50,16 @@
         .hud-val { font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; }
         .stat-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 8px; position: relative; overflow: hidden; }
         .stat-fill { position: absolute; top:0; left:0; height:100%; background: var(--p); box-shadow: var(--glow); transition: 0.5s; }
+
+        /* ANALOG CLOCK & WEATHER CSS ADDED */
+        .analog-wrapper { display: flex; justify-content: space-between; align-items: center; }
+        .analog-clock { width: 35px; height: 35px; border: 2px solid var(--p); border-radius: 50%; position: relative; box-shadow: 0 0 10px rgba(0,242,255,0.2); }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; background: var(--p); transform: translateX(-50%); border-radius: 2px; }
+        .hour { width: 2px; height: 8px; background: #fff; }
+        .minute { width: 2px; height: 12px; background: rgba(255,255,255,0.7); }
+        .second { width: 1px; height: 15px; background: var(--red); }
+        .center-dot { width: 4px; height: 4px; background: var(--red); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .weather-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
 
         main { position: relative; overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; padding: 25px; transform-style: preserve-3d; }
@@ -106,7 +116,7 @@
                     <button class="top-btn nitro-btn" onclick="toggleNitro()">NITRO</button>
                 </div>
             </header>
-            <aside class="glass">
+            <aside class="glass" style="overflow-y:auto;">
                 <div id="speedo-wrap">
                     <div class="gauge-val" id="speedo">000</div>
                     <div style="letter-spacing:5px; opacity:0.6; font-size:0.7rem;">MACH VELOCITY</div>
@@ -114,7 +124,24 @@
 
                 <div class="hud-module">
                     <div class="hud-label">Temporal Matrix</div>
-                    <div class="hud-val" id="clock">00:00:00</div>
+                    <div class="analog-wrapper">
+                        <div class="hud-val" id="clock">00:00:00</div>
+                        <div class="analog-clock">
+                            <div class="hand hour" id="h-hand"></div>
+                            <div class="hand minute" id="m-hand"></div>
+                            <div class="hand second" id="s-hand"></div>
+                            <div class="center-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hud-module">
+                    <div class="hud-label">Atmospheric Sensors</div>
+                    <div class="weather-grid">
+                        <div><div style="font-size:0.5rem; opacity:0.6; letter-spacing:2px;">TEMP</div><div class="hud-val" id="temp-val">--°C</div></div>
+                        <div><div style="font-size:0.5rem; opacity:0.6; letter-spacing:2px;">AQI</div><div class="hud-val" id="aqi-val" style="color: #00ff66;">--</div></div>
+                    </div>
+                    <div id="weather-loc" style="font-size:0.6rem; opacity:0.6; margin-top:8px; letter-spacing:2px;">AWAITING SATELLITE...</div>
                 </div>
 
                 <div class="hud-module">
@@ -128,7 +155,7 @@
                     <div class="hud-val" id="net-txt">STABLE</div>
                 </div>
 
-                <div id="terminal" style="flex-grow:1; overflow-y:auto; padding:20px; font-family:'Source Code Pro'; font-size:0.6rem; line-height:2; opacity: 0.5;"></div>
+                <div id="terminal" style="flex-grow:1; padding:20px; font-family:'Source Code Pro'; font-size:0.6rem; line-height:2; opacity: 0.5;"></div>
             </aside>
             <main class="glass" id="viewport"></main>
         </div>
@@ -176,10 +203,7 @@
                     speak("Command not recognized, Boss. Please try again.");
                 }
             };
-
-            recognition.onerror = function(event) {
-                log(`VOICE ERROR: ${event.error}`);
-            };
+            recognition.onerror = function(event) { log(`VOICE ERROR: ${event.error}`); };
         }
 
         function startVoiceCommand() {
@@ -188,15 +212,55 @@
                 log("SYS_ERR: WebKit Speech Recognition missing.");
                 return;
             }
-            playSound(1000);
-            speak("Listening for directive.");
+            playSound(1000); speak("Listening for directive.");
             setTimeout(() => { recognition.start(); }, 1200); 
         }
 
-        /* EXISTING HUD & MODULES */
+        /* NEW: ATMOSPHERIC SENSORS FETCH LOGIC */
+        async function fetchAtmosphere() {
+            try {
+                // 1. Silent IP Geolocation (No annoying popups)
+                const geoRes = await fetch('https://ipapi.co/json/');
+                const geoData = await geoRes.json();
+                const lat = geoData.latitude || 17.385;
+                const lon = geoData.longitude || 78.4867;
+                
+                // 2. Fetch Free Weather & AQI from Open-Meteo
+                const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const wData = await wRes.json();
+                document.getElementById('temp-val').innerText = wData.current_weather.temperature + "°C";
+                
+                const aRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi`);
+                const aData = await aRes.json();
+                const aqi = aData.current.us_aqi;
+                
+                const aqiEl = document.getElementById('aqi-val');
+                aqiEl.innerText = aqi;
+                // Dynamic AQI Colors
+                if(aqi < 50) aqiEl.style.color = '#00ff66';
+                else if(aqi < 100) aqiEl.style.color = 'var(--aws)';
+                else aqiEl.style.color = 'var(--red)';
+
+                document.getElementById('weather-loc').innerText = `LOC: ${geoData.city ? geoData.city.toUpperCase() : 'UPLINK'} | ACTIVE`;
+                log("SATELLITE: Weather & AQI Synced.");
+            } catch(e) {
+                document.getElementById('weather-loc').innerText = "SATELLITE OFFLINE";
+                log("SYS_ERR: Atmospheric sensors failed.");
+            }
+        }
+
+        /* UPGRADED HUD: CLOCK (DIGITAL+ANALOG), BATT, NETWORK */
         function updateHUD() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+            
+            // Analog Hands Math
+            const h = now.getHours() % 12; const m = now.getMinutes(); const s = now.getSeconds();
+            document.getElementById('h-hand').style.transform = `translateX(-50%) rotate(${(h * 30) + (m * 0.5)}deg)`;
+            document.getElementById('m-hand').style.transform = `translateX(-50%) rotate(${m * 6}deg)`;
+            document.getElementById('s-hand').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+
+            // Battery
             if(navigator.getBattery) {
                 navigator.getBattery().then(b => {
                     const level = Math.floor(b.level * 100);
@@ -204,7 +268,9 @@
                     document.getElementById('batt-bar').style.width = level + "%";
                 });
             }
+            // Network
             document.getElementById('net-txt').innerText = navigator.onLine ? "SECURE" : "OFFLINE";
+            document.getElementById('net-txt').style.color = navigator.onLine ? "var(--p)" : "var(--red)";
         }
         setInterval(updateHUD, 1000);
 
@@ -247,6 +313,7 @@
             sCanvas.width = window.innerWidth * dpr; sCanvas.height = window.innerHeight * dpr;
             sCtx.scale(dpr, dpr);
             initSpace(); updateSparks();
+            fetchAtmosphere(); // Call satellite data
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('handshake').style.display = 'flex'; }, 1200);
         }
 
