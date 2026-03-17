@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SKYRO APEX V12.1 | FINAL GOAT</title>
+    <title>SKYRO APEX V12.2 | SHASWAT EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --p: #00f2ff; --bg: #000; --red: #ff003c; --glow: 0 0 25px rgba(0, 242, 255, 0.6); }
@@ -76,7 +76,7 @@
 
     <div id="handshake" onclick="boot()">
         <div class="hand-scanner"><div class="scan-line"></div></div>
-        <div style="margin-top:15px; color:#0f0; font-family:'Source Code Pro'; font-size:0.8rem;">AUTHENTICATION: REQUIRED</div>
+        <div style="margin-top:15px; color:#0f0; font-family:'Source Code Pro'; font-size:0.8rem;">AUTHENTICATION: SHASWAT ONLY</div>
     </div>
 
     <div id="shatter"></div>
@@ -85,7 +85,7 @@
 
     <div id="ui-wrapper">
         <div id="container">
-            <header class="glass"><div class="logo-text">SKYRO APEX OS</div><div id="status" style="color:#0f0; font-size:0.7rem;">STATUS: ONLINE</div></header>
+            <header class="glass"><div class="logo-text">SKYRO <span style="font-size:0.7rem; letter-spacing:2px; opacity:0.6;">by Shaswat</span></div><div id="status" style="color:#0f0; font-size:0.7rem;">STATUS: ONLINE</div></header>
             <aside class="glass">
                 <div id="terminal"></div>
                 <button class="destruct-btn" onclick="destruct()">RED_PROTOCOL</button>
@@ -99,8 +99,8 @@
             { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', link: 'https://youtube.com', label: 'YOUTUBE' },
             { id: 'mk4', name: 'MARK 4', icon: '❖', color: '#00ff66', link: 'https://play.google.com', label: 'PLAY STORE' },
             { id: 'mk5', name: 'MARK 5', icon: '⚔', color: '#ffaa00', link: 'https://www.pubgmobile.com', label: 'PUBG MOBILE' },
-            { id: 'mk50', name: 'MARK 50', icon: '⚙', color: '#b300ff', link: 'chrome://settings', label: 'SETTINGS' },
-            { id: 'mk85', name: 'MARK 85', icon: '∑', color: '#ffffff', link: 'https://www.google.com/search?q=calculator', label: 'CALCULATOR' },
+            { id: 'mk50', name: 'MARK 50', icon: '⚡', color: '#b300ff', link: 'https://www.instagram.com', label: 'INSTAGRAM' },
+            { id: 'mk85', name: 'MARK 85', icon: '♾', color: '#ffffff', link: 'https://www.flipkart.com', label: 'FLIPKART' },
             { id: 'mk1', name: 'MARK 1', icon: '🗺', color: '#00f2ff', link: 'https://maps.google.com', label: 'GOOGLE MAPS' },
             { id: 'skyro', name: 'APEX', icon: '⚛', color: '#00f2ff', link: '#', label: 'VOLUMETRIC' }
         ];
@@ -112,7 +112,7 @@
         function speak(t) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.8; u.rate=1; window.speechSynthesis.speak(u); } catch(e){} }
 
         function boot() {
-            speak("Welcome Skyro. System online.");
+            speak("Welcome, Shaswat. SKYRO systems are now under your command.");
             document.getElementById('handshake').style.display='none';
             const ui = document.getElementById('ui-wrapper'); ui.style.display='block'; setTimeout(()=>ui.style.opacity='1', 100);
             render();
