@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyro's | APEX V9.2 MATRIX</title>
+    <title>Skyro's | APEX V9.4 SONIC</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Source+Code+Pro:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00f2ff; --bg: #010409; --glow: 0 0 30px rgba(0, 242, 255, 0.6); }
@@ -25,12 +25,6 @@
         .boot-bar { width: 600px; height: 2px; background: rgba(0,255,0,0.2); margin-top: 20px; }
         .boot-fill { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 20px #0f0; }
         #particle-engine { position: fixed; width: 100%; height: 100%; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
-        #targeting-hud { position: fixed; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.8; }
-        .hud-line { position: absolute; background: var(--primary); opacity: 0.3; }
-        .hud-crosshair { position: absolute; width: 80px; height: 80px; border: 1px solid var(--primary); border-radius: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; box-shadow: var(--glow); }
-        .hud-crosshair::after, .hud-crosshair::before { content: ""; position: absolute; background: var(--primary); }
-        .hud-crosshair::after { width: 100%; height: 1px; } .hud-crosshair::before { width: 1px; height: 100%; }
-        .hud-coords { position: absolute; font-family: 'Source Code Pro'; font-size: 0.8rem; top: 90px; left: 90px; text-shadow: var(--glow); font-weight: 700; }
 
         /* LAYOUT */
         #app { position: relative; z-index: 10; display: grid; grid-template-columns: 320px 1fr; grid-template-rows: 80px 1fr; height: 100vh; padding: 20px; gap: 20px; opacity: 0; transition: opacity 1s; }
@@ -41,167 +35,139 @@
         .log-entry { border-left: 3px solid var(--primary); padding-left: 10px; animation: slideIn 0.2s; }
         main { border: 1px solid var(--primary); background: rgba(0,0,0,0.6); padding: 40px; position: relative; overflow-y: auto; backdrop-filter: blur(10px); }
 
-        /* HOME GRID */
+        /* CARDS & BUTTONS */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; perspective: 2000px; padding: 20px; }
         .card { background: rgba(255,255,255,0.02); border: 1px solid var(--primary); padding: 30px; cursor: pointer; transform-style: preserve-3d; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card:hover { transform: translateZ(50px) scale(1.05); background: rgba(0,0,0,0.9); box-shadow: 0 30px 60px rgba(0,0,0,0.9), var(--glow); }
         .card-title { font-family: 'Orbitron'; font-size: 2rem; margin: 15px 0; font-weight: 900; text-shadow: var(--glow); transform: translateZ(30px); }
-        .card.master { border-color: #fff; background: rgba(0,242,255,0.05); } .card.master .card-title { color: #fff; text-shadow: 0 0 20px #00f2ff; }
+        .btn { background: #000; border: 2px solid var(--primary); color: var(--primary); padding: 15px 40px; font-family: 'Orbitron'; cursor: pointer; transition: 0.2s; text-transform: uppercase; pointer-events: auto; font-weight: 900; margin-top:10px; }
+        .btn:hover { background: var(--primary); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
+        .btn-yt { border-color: #ff0000; color: #ff0000; } .btn-ps { border-color: #00ffcc; color: #00ffcc; }
 
-        /* DASHBOARD */
+        /* DASHBOARD VIEWS */
         .dashboard-view { display: flex; width: 100%; height: 100%; position: relative; animation: bootUp 0.8s; }
         .center-stage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 600px; transform-style: preserve-3d; z-index: 5; pointer-events: none; }
         .hud-panels { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
         .data-box { background: rgba(0,0,0,0.9); border: 2px solid var(--primary); padding: 30px; font-family: 'Source Code Pro'; font-size: 1.1rem; text-shadow: var(--glow); box-shadow: var(--glow); }
-        .btn { background: #000; border: 2px solid var(--primary); color: var(--primary); padding: 15px 40px; font-family: 'Orbitron'; cursor: pointer; transition: 0.2s; text-transform: uppercase; pointer-events: auto; font-weight: 900; }
-        .btn:hover { background: var(--primary); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
-        
-        /* EXTERNAL UPLINK BUTTONS */
-        .btn-yt { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); margin-bottom: 15px; }
-        .btn-yt:hover { background: #ff0000; color: #fff; box-shadow: 0 0 30px #ff0000; transform: scale(1.05); }
-        
-        .btn-ps { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); margin-bottom: 15px; }
-        .btn-ps:hover { background: #00ffcc; color: #000; box-shadow: 0 0 30px #00ffcc; transform: scale(1.05); }
 
-        /* --- 3D ANIMATIONS --- */
+        /* 3D MODELS */
         .mk3-reactor { width: 100%; height: 100%; transform-style: preserve-3d; animation: spinXY 10s linear infinite; }
-        .mk3-r { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 3px solid var(--primary); transform: translate(-50%, -50%); box-shadow: var(--glow), inset var(--glow); }
-        .mk3-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--primary) 60%, transparent); animation: pulseCore 0.5s infinite alternate; filter: blur(5px); }
-        
+        .mk3-r { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 3px solid var(--primary); transform: translate(-50%, -50%); box-shadow: var(--glow); }
         .mk5-core { transform-style: preserve-3d; animation: spinY 10s linear infinite; width: 100%; height: 100%; position: absolute; }
-        .mk5-s { position: absolute; width: 80px; height: 80px; background: rgba(255,10,47,0.1); border: 2px solid var(--primary); animation: explode 4s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite alternate; }
-        
-        .mk7-gyro { width: 100%; height: 100%; transform-style: preserve-3d; animation: spinZ 15s linear infinite; position: absolute; }
-        .mk7-a { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 5px solid rgba(255,85,0,0.4); box-shadow: 0 0 20px var(--primary); }
-        .mk7-laser { position: absolute; top: 50%; left: -50%; width: 200%; height: 4px; background: #fff; box-shadow: 0 0 40px var(--primary); animation: scan 1.5s infinite alternate; }
-        
-        .mk42-swarm { width: 100%; height: 100%; transform-style: preserve-3d; animation: spinY 8s linear infinite; position: absolute; }
-        .mk42-p { position: absolute; top: 50%; left: 50%; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 60px solid var(--primary); transform-origin: 50% 150px; }
-        
-        .mk50-liquid { width: 100%; height: 100%; filter: url('#gooey'); animation: spinZ 10s linear infinite; position: absolute; }
-        .mk50-b { position: absolute; top: 50%; left: 50%; background: var(--primary); border-radius: 50%; transform: translate(-50%, -50%); }
-        
-        .mk85-tunnel { width: 100%; height: 100%; transform-style: preserve-3d; perspective: 500px; position: absolute; }
-        .mk85-h { position: absolute; top: 50%; left: 50%; margin: -200px 0 0 -173px; width: 346px; height: 400px; border: 10px solid; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); animation: dive 4s infinite linear; }
+        .mk5-s { position: absolute; width: 80px; height: 80px; background: rgba(255,10,47,0.1); border: 2px solid var(--primary); animation: explode 4s infinite alternate; }
+        #mech-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 20; }
 
-        /* VOLUMETRIC CANVAS */
-        #mech-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; z-index: 20; filter: drop-shadow(0 0 10px #00ffff); }
-
-        /* KEYFRAMES */
-        @keyframes pulseCore { 0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } }
-        @keyframes spinX { 100% { transform: rotateX(360deg); } } @keyframes spinY { 100% { transform: rotateY(360deg); } } 
-        @keyframes spinZ { 100% { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); } } @keyframes spinXY { 100% { transform: rotate3d(1, 1, 1, 360deg); } }
-        @keyframes explode { 0% { transform: translate(-50%, -50%) translateZ(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) translateZ(var(--dz)) rotateX(360deg) rotateY(360deg); opacity: 0.2; } }
-        @keyframes scan { 0% { top: 0%; transform: rotateX(45deg) scaleY(0.1); } 50% { transform: rotateX(45deg) scaleY(2); } 100% { top: 100%; transform: rotateX(45deg) scaleY(0.1); } }
-        @keyframes dive { 0% { transform: translateZ(-2000px) scale(0.1) rotate(0deg); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateZ(500px) scale(3) rotate(180deg); opacity: 0; } }
-        @keyframes bootUp { 0% { opacity: 0; transform: scale(0.5) translateZ(-500px); } 100% { opacity: 1; transform: scale(1) translateZ(0); } }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: var(--primary); }
+        @keyframes pulseCore { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; } }
+        @keyframes spinXY { 100% { transform: rotate3d(1, 1, 1, 360deg); } }
+        @keyframes explode { 0% { transform: translate(-50%, -50%) translateZ(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) translateZ(var(--dz)) rotateX(360deg); opacity: 0.2; } }
+        @keyframes bootUp { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
-    <svg style="width:0;height:0;position:absolute;"><filter id="gooey"><feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" /><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -10" result="goo" /><feBlend in="SourceGraphic" in2="goo" /></filter></svg>
-
-    <div id="handshake" onclick="startBoot()"><div class="handshake-btn">[ INITIATE NEURAL HANDSHAKE ]</div><div style="color:#0f0; margin-top:20px; font-family:'Source Code Pro';">AUTHORIZATION: BOSS ONLY</div></div>
-    <div id="boot-screen"><div style="font-size:2rem; letter-spacing:10px; text-shadow:0 0 20px #0f0;" id="boot-txt">ESTABLISHING UPLINK...</div><div class="boot-bar"><div class="boot-fill" id="b-fill"></div></div></div>
+    <div id="handshake" onclick="startBoot()"><div class="handshake-btn">[ INITIATE NEURAL HANDSHAKE ]</div><div style="color:#0f0; margin-top:20px; font-family:'Source Code Pro';">VERIFYING BIOMETRICS...</div></div>
+    <div id="boot-screen"><div style="font-size:2rem; letter-spacing:10px; color:#0f0;" id="boot-txt">ESTABLISHING SONIC UPLINK...</div><div class="boot-bar"><div class="boot-fill" id="b-fill"></div></div></div>
     
     <canvas id="particle-engine"></canvas>
-    <div id="targeting-hud"><div id="hud-v" class="hud-line" style="width: 1px; height: 100%;"></div><div id="hud-h" class="hud-line" style="width: 100%; height: 1px;"></div><div class="hud-crosshair" id="crosshair"><div id="hud-coords" class="hud-coords">X: 000<br>Y: 000</div></div></div>
 
     <div id="app">
-        <header>
-            <div class="logo">SKYRO'S <span style="font-size: 1.2rem; font-weight: 300; opacity: 0.5;">// MATRIX V9.2</span></div>
-            <div style="font-family: 'Source Code Pro'; font-size: 0.9rem; text-align: right; color: #0f0; text-shadow: 0 0 10px #0f0;">AWS SERVER: BEAST-MODE<br>LATENCY: 0.1ms</div>
-        </header>
-        <aside class="terminal"><div class="term-header" style="font-family:'Orbitron'; color:var(--primary); border-bottom:1px solid var(--primary); margin-bottom:10px;">NEURAL_NET_v15</div><div id="log-stream"></div></aside>
+        <header><div class="logo">SKYRO <span style="font-size: 1.2rem; opacity: 0.5;">// SONIC V9.4</span></div><div id="status-box" style="color:#0f0;">VOICE: STANDBY</div></header>
+        <aside class="terminal"><div id="log-stream"></div></aside>
         <main id="router-view"></main>
     </div>
 
     <script>
         const suits = [
-            { id: 'skyro', name: 'PROJECT: SKYRO', class: 'FULL BODY SCHEMATIC', desc: 'Volumetric 3D Particle Exoskeleton.', isMaster: true },
-            { id: 'mk3', name: 'MARK III', class: 'PLASMA TORUS', desc: 'High-yield fusion generation.', isMaster: false },
-            { id: 'mk5', name: 'MARK V', class: 'KINETIC FRACTAL', desc: 'Explosive re-assembly matrix.', isMaster: false },
-            { id: 'mk7', name: 'MARK VII', class: 'GYRO-LASER', desc: 'Omni-directional targeting.', isMaster: false },
-            { id: 'mk42', name: 'MARK XLII', class: 'MAGNETIC SWARM', desc: 'Autonomous tracking shards.', isMaster: false },
-            { id: 'mk50', name: 'MARK L', class: 'LIQUID METAL', desc: 'Nanotech fluid morphing.', isMaster: false },
-            { id: 'mk85', name: 'MARK LXXXV', class: 'INFINITY TUNNEL', desc: 'Cosmic dimension folding.', isMaster: false }
+            { id: 'skyro', name: 'PROJECT: SKYRO', class: 'VOLUMETRIC', desc: '3D Particle Exoskeleton.' },
+            { id: 'mk3', name: 'MARK III', class: 'MEDIA UPLINK', desc: 'YouTube Database Access.' },
+            { id: 'mk5', name: 'MARK V', class: 'APP UPLINK', desc: 'Play Store Mainframe.' },
+            { id: 'mk7', name: 'MARK VII', class: 'GYRO-LASER', desc: 'Targeting Array.' },
+            { id: 'mk42', name: 'MARK XLII', class: 'SWARM', desc: 'Magnetic Shards.' },
+            { id: 'mk50', name: 'MARK L', class: 'LIQUID', desc: 'Nanotech Morph.' },
+            { id: 'mk85', name: 'MARK LXXXV', class: 'INFINITY', desc: 'Cosmic Folder.' }
         ];
 
         let activeRoute = 'home', sysInit = false;
         const canvas = document.getElementById('particle-engine'), ctx = canvas.getContext('2d');
-        let particles = [];
-        let mechParticles = [], mechAngle = 0, mechAnimId;
+        let mechParticles = [], mechAngle = 0;
+
+        /* VOICE ENGINE V9.4 */
+        function speak(text) {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel(); // Clear queue
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.pitch = 0.85; 
+            utterance.rate = 1.0;
+            utterance.volume = 1.0;
+            
+            // Critical Fix: Force browser to honor the request
+            window.speechSynthesis.speak(utterance);
+            logAction(`AUDIO_OUT: "${text}"`);
+        }
 
         function startBoot() {
-            document.getElementById('handshake').style.display = 'none'; document.getElementById('boot-screen').style.display = 'flex';
-            const s = window.speechSynthesis, u = new SpeechSynthesisUtterance("Welcome Skyro. Mainframe operational. Matrix protocols online. Awaiting your command, Boss."); u.pitch = 0.8; u.rate = 1.05;
-            let w = 0; const bootInt = setInterval(() => {
-                w += Math.random()*15; if(w>100) w=100; document.getElementById('b-fill').style.width = w+'%';
-                if(w>30) document.getElementById('boot-txt').innerText = "CONFIGURING MEDIA UPLINKS...";
-                if(w>70) document.getElementById('boot-txt').innerText = "UNLEASHING BEAST MODE...";
-                if(w>=100) { clearInterval(bootInt); s.speak(u); setTimeout(() => { document.getElementById('boot-screen').style.display = 'none'; document.getElementById('app').style.opacity = '1'; initSystem(); }, 500); }
-            }, 200);
-        }
-
-        function initSystem() { sysInit = true; resize(); window.addEventListener('resize', resize); initParticles(); drawParticles(); logAction("APEX V9.2: MATRIX ENGINE ONLINE."); window.addEventListener('hashchange', handleRouting); handleRouting(); }
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        function initParticles() { particles = []; for(let i=0; i<300; i++) particles.push({ x: Math.random()*canvas.width-canvas.width/2, y: Math.random()*canvas.height-canvas.height/2, z: Math.random()*canvas.width, a: Math.random()*Math.PI*2, s: Math.random()*5+2 }); }
-
-        function drawParticles() {
-            ctx.fillStyle = (activeRoute==='mk5') ? 'rgba(5,0,0,0.4)' : ((activeRoute==='home') ? 'rgba(1,4,9,0.3)' : 'rgba(0,0,0,0.3)'); ctx.fillRect(0,0,canvas.width,canvas.height);
-            const cx = canvas.width/2, cy = canvas.height/2, color = getComputedStyle(document.body).getPropertyValue('--primary').trim() || '#00f2ff';
-            particles.forEach((p, i) => {
-                if(activeRoute === 'skyro' || activeRoute === 'home') {
-                    p.a += 0.01; p.x += Math.cos(p.a)*1; p.y += Math.sin(p.a)*1; if(Math.abs(p.x)>cx) p.x*=-1; if(Math.abs(p.y)>cy) p.y*=-1;
-                    ctx.beginPath(); ctx.arc(p.x+cx, p.y+cy, 2, 0, Math.PI*2); ctx.fillStyle = color; ctx.globalAlpha=0.5; ctx.fill(); ctx.globalAlpha=1;
-                } else if(activeRoute === 'mk3' || activeRoute === 'mk85') {
-                    p.z -= (activeRoute==='mk3'?20:5); if(p.z<=0){ p.x=Math.random()*canvas.width-cx; p.y=Math.random()*canvas.height-cy; p.z=canvas.width; }
-                    let x = cx+(p.x/p.z)*canvas.width, y = cy+(p.y/p.z)*canvas.width; ctx.beginPath(); ctx.arc(x, y, (1-p.z/canvas.width)*5, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
-                } else if(activeRoute === 'mk5') {
-                    p.y += p.s*3; if(p.y>cy){ p.y=-cy-100; p.x=Math.random()*canvas.width-cx; } ctx.beginPath(); ctx.rect(p.x+cx, p.y+cy, 2, 20); ctx.fillStyle = color; ctx.fill();
-                } else {
-                    p.x += p.s*2; if(p.x>cx){ p.x=-cx-100; p.y=Math.random()*canvas.height-cy; } ctx.beginPath(); ctx.moveTo(p.x+cx, p.y+cy); ctx.lineTo(p.x+cx+50, p.y+cy); ctx.strokeStyle=color; ctx.stroke();
+            // First interaction: Unlock voice immediately
+            speak("Welcome Skyro."); 
+            
+            document.getElementById('handshake').style.display = 'none';
+            document.getElementById('boot-screen').style.display = 'flex';
+            
+            let w = 0;
+            const bootInt = setInterval(() => {
+                w += Math.random()*20; if(w>100) w=100;
+                document.getElementById('b-fill').style.width = w+'%';
+                if(w>=100) {
+                    clearInterval(bootInt);
+                    speak("Mainframe operational. Voice uplink stable.");
+                    setTimeout(() => {
+                        document.getElementById('boot-screen').style.display = 'none';
+                        document.getElementById('app').style.opacity = '1';
+                        initSystem();
+                    }, 500);
                 }
-            }); requestAnimationFrame(drawParticles);
+            }, 150);
         }
 
-        function generateMech() {
-            mechParticles = [];
-            for(let i=0; i<4000; i++) {
-                let x = (Math.random()-0.5)*200, y = (Math.random()-0.5)*350, z = (Math.random()-0.5)*100, v = false;
-                if (x*x + (y+130)*(y+130) + z*z < 25*25) v = true;
-                let w = 45 - (y+80)*0.15;
-                if (!v && y>-90 && y<30 && Math.abs(x) < w && Math.abs(z) < 25) v = true;
-                let glow = false;
-                if (x*x + (y+50)*(y+50) + (z-25)*(z-25) < 18*18) { v = true; glow = true; }
-                if (!v && Math.abs(x)>40 && Math.abs(x)<70 && y>-80 && y<50 && Math.abs(z)<15) v = true;
-                if (!v && Math.abs(x)>10 && Math.abs(x)<40 && y>30 && y<170 && Math.abs(z)<20) v = true;
-                if(v) mechParticles.push({x:x, y:y, z:z, oX:x, oY:y, oZ:z, g:glow});
+        function initSystem() {
+            sysInit = true; resize();
+            window.addEventListener('resize', resize);
+            window.addEventListener('hashchange', handleRouting);
+            handleRouting();
+            logAction("SONIC CORE V9.4 ONLINE");
+            document.getElementById('status-box').innerText = "VOICE: ACTIVE";
+        }
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+        function logAction(msg) {
+            const s = document.getElementById('log-stream'), e = document.createElement('div');
+            e.className = 'log-entry'; e.innerHTML = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+            s.prepend(e);
+        }
+
+        function navigate(path) { window.location.hash = path; }
+
+        function handleRouting() {
+            activeRoute = window.location.hash.replace('#', '') || 'home';
+            const view = document.getElementById('router-view');
+            
+            if (activeRoute === 'home') {
+                view.innerHTML = `<div class="grid">${suits.map(s => `<div class="card" onclick="navigate('${s.id}')"><div class="card-title">${s.name}</div><div>${s.class}</div></div>`).join('')}</div>`;
+            } else {
+                const suit = suits.find(s => s.id === activeRoute);
+                speak(`Deploying ${suit.name}`);
+                
+                let h = '';
+                if(activeRoute === 'mk3') h = `<div class="mk3-reactor"><div class="mk3-r" style="width:300px; height:300px;"></div><div class="mk3-r" style="width:150px; height:150px; border-style:dashed;"></div></div>`;
+                else if(activeRoute === 'mk5') h = `<div class="mk5-core">${Array(15).fill(0).map(()=>`<div class="mk5-s" style="--dx:${(Math.random()-0.5)*400}px; --dy:${(Math.random()-0.5)*400}px; --dz:${(Math.random()-0.5)*400}px;"></div>`).join('')}</div>`;
+                else h = `<div style="font-size:3rem; border:2px solid;">${suit.name} MODEL ACTIVE</div>`;
+
+                let btns = `<button class="btn" onclick="navigate('home')">ARCHIVE</button>`;
+                if(activeRoute === 'mk3') btns = `<button class="btn btn-yt" onclick="window.location.href='https://youtube.com'">OPEN YOUTUBE</button><br>` + btns;
+                if(activeRoute === 'mk5') btns = `<button class="btn btn-ps" onclick="window.location.href='https://play.google.com'">OPEN PLAY STORE</button><br>` + btns;
+
+                view.innerHTML = `<div class="dashboard-view"><div class="center-stage">${h}</div><div class="hud-panels"><div class="data-box"><h2>${suit.name}</h2></div><div class="data-box">${btns}</div></div></div>`;
             }
         }
-
-        function drawMech() {
-            if(activeRoute !== 'skyro') { cancelAnimationFrame(mechAnimId); return; }
-            const c = document.getElementById('mech-canvas'); if(!c) return;
-            const cx = c.getContext('2d'); cx.clearRect(0,0,c.width,c.height);
-            mechAngle += 0.015; let cos = Math.cos(mechAngle), sin = Math.sin(mechAngle), midX = c.width/2, midY = c.height/2;
-            mechParticles.forEach(p => {
-                let hov = Math.sin(Date.now()*0.002 + p.oX)*3;
-                let rx = p.oX * cos - p.oZ * sin, rz = p.oZ * cos + p.oX * sin, ry = p.oY + hov;
-                let scale = 400 / (400 + rz), px = midX + rx * scale * 1.5, py = midY + ry * scale * 1.5;
-                cx.beginPath(); cx.arc(px, py, p.g ? 3*scale : 1.2*scale, 0, Math.PI*2);
-                cx.fillStyle = p.g ? '#fff' : `rgba(0, 242, 255, ${0.2 + scale*0.6})`;
-                if(p.g) { cx.shadowBlur = 15; cx.shadowColor = '#00ffff'; } else { cx.shadowBlur = 0; }
-                cx.fill();
-            }); mechAnimId = requestAnimationFrame(drawMech);
-        }
-
-        document.addEventListener('mousemove', (e) => {
-            document.getElementById('hud-v').style.left = e.clientX+'px'; document.getElementById('hud-h').style.top = e.clientY+'px';
-            document.getElementById('crosshair').style.left = e.clientX+'px'; document.getElementById('crosshair').style.top = e.clientY+'px';
-            document.getElementById('hud-coords').innerHTML = `X: ${e.clientX.toString().padStart(4,'0')}<br>Y: ${e.clientY.toString().padStart(4,'0')}`;
-            const s = document.getElementById('center-stage'); if(s) s.style.transform = `translate(-50%, -50%) rotateY(${(window.innerWidth/2 - e.clientX)/15}deg) rotateX(${(window.innerHeight/2 - e.clientY)/15}deg)`;
-        });
-
-        function logAction(msg) { const s = document.getElementById('log-stream'), e = document.createElement('div'); e.className='log-entry'; e.innerHTML=`[${new Date().toLocaleT
+    </script>
+</body>
+</html>
