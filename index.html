@@ -2,194 +2,180 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKYRO APEX V10 | GOD-TIER</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@300;700&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SKYRO APEX V12.1 | FINAL GOAT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #00f2ff; --bg: #00050a; --glow: 0 0 25px rgba(0, 242, 255, 0.5); }
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
-        body, html { background: var(--bg); color: var(--p); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; perspective: 1500px; }
+        :root { --p: #00f2ff; --bg: #000; --red: #ff003c; --glow: 0 0 25px rgba(0, 242, 255, 0.6); }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
+        body, html { background: var(--bg); color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 1000px; touch-action: manipulation; }
 
-        /* NEURAL HANDSHAKE & BOOT */
-        #handshake { position: fixed; inset: 0; background: #000; z-index: 50000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .h-btn { font-family: 'Orbitron'; font-size: 1.8rem; color: #0f0; border: 4px double #0f0; padding: 30px 60px; background: rgba(0,255,0,0.05); text-shadow: 0 0 15px #0f0; box-shadow: 0 0 30px rgba(0,255,0,0.2), inset 0 0 30px rgba(0,255,0,0.2); animation: pulse 1.5s infinite; transition: 0.3s; }
-        .h-btn:hover { background: #0f0; color: #000; box-shadow: 0 0 60px #0f0; transform: scale(1.1); }
-        #boot { position: fixed; inset: 0; background: #000; z-index: 40000; display: none; align-items: center; justify-content: center; flex-direction: column; font-family: 'Source Code Pro'; }
-        .b-bar { width: 400px; height: 4px; background: rgba(0,255,0,0.1); margin-top: 20px; border-radius: 4px; overflow: hidden; }
-        .b-fill { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 20px #0f0; }
+        /* BOOT INTERFACE */
+        #handshake { position: fixed; inset: 0; z-index: 5000; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; }
+        .hand-scanner { width: 180px; height: 180px; border: 2px solid #0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: pulse 2s infinite; cursor: pointer; }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: #0f0; top: 0; animation: scanLine 2s infinite ease-in-out; box-shadow: 0 0 15px #0f0; }
 
-        /* THE CHASSIS */
-        #app { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: 90px 1fr; height: 100vh; padding: 25px; gap: 20px; opacity: 0; transition: 1.5s; z-index: 10; position: relative; }
-        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--p); background: rgba(0,20,40,0.4); backdrop-filter: blur(15px); padding: 0 40px; box-shadow: var(--glow); }
-        .logo { font-family: 'Orbitron'; font-size: 2.8rem; font-weight: 900; letter-spacing: 15px; text-shadow: var(--glow); }
+        /* HUD ELEMENTS */
+        #ui-wrapper { position: relative; width: 100%; height: 100%; z-index: 10; display: none; opacity: 0; transition: 1.5s; }
+        .glass { background: rgba(0, 20, 40, 0.5); border: 1px solid var(--p); backdrop-filter: blur(15px); border-radius: 10px; }
+
+        /* LAYOUT */
+        #container { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 70px 1fr; height: 100vh; padding: 15px; gap: 15px; }
+        header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: var(--glow); }
+        .logo-text { font-size: 1.5rem; font-weight: 900; letter-spacing: 5px; }
         
-        aside { background: rgba(0,0,0,0.8); border: 1px solid var(--p); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(10px); }
-        #log { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.75rem; color: var(--p); }
-        .log-e { border-left: 2px solid var(--p); padding-left: 10px; margin-bottom: 8px; animation: l-in 0.3s ease-out; }
+        aside { display: flex; flex-direction: column; overflow: hidden; }
+        #terminal { flex-grow: 1; overflow-y: auto; font-family: 'Source Code Pro'; font-size: 0.7rem; padding: 10px; }
+        .log-ln { border-left: 2px solid var(--p); padding-left: 10px; margin-bottom: 5px; animation: slideR 0.3s; }
 
-        main { border: 1px solid var(--p); background: rgba(0,10,20,0.3); position: relative; overflow: hidden; backdrop-filter: blur(5px); }
+        main { position: relative; overflow-y: auto; scrollbar-width: none; }
+        main::-webkit-scrollbar { display: none; }
 
-        /* 3D CARD GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px; height: 100%; overflow-y: auto; }
-        .card { background: rgba(0, 242, 255, 0.03); border: 1px solid rgba(0, 242, 255, 0.3); padding: 30px; position: relative; transform-style: preserve-3d; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .card:hover { transform: translateZ(50px) rotateX(10deg) rotateY(10deg); background: rgba(0, 242, 255, 0.1); border-color: var(--p); box-shadow: var(--glow); }
-        .card-icon { width: 80px; height: 80px; margin-bottom: 20px; position: relative; transform-style: preserve-3d; transition: 0.5s; }
-        .card:hover .card-icon { transform: rotateY(360deg); }
-        .card-title { font-family: 'Orbitron'; font-size: 1.6rem; font-weight: 900; margin-bottom: 10px; }
+        /* GRID SYSTEM */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 15px; }
+        .card { padding: 20px; text-align: center; transition: 0.4s; transform-style: preserve-3d; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 12px; }
+        .card:hover { transform: scale(1.03) translateZ(20px); background: rgba(0, 242, 255, 0.15); border-color: var(--p); box-shadow: var(--glow); }
+        .icon-3d { font-size: 3rem; margin-bottom: 10px; display: block; animation: floating 3s infinite alternate; }
 
-        /* DASHBOARD ANIMATIONS */
-        #visual-core { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-        .center-obj { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); transform-style: preserve-3d; }
-        .hud-overlay { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: flex-end; padding: 40px; pointer-events: none; z-index: 100; }
-        
-        /* THE BEAST MODE BUTTONS */
-        .beast-btn { background: #000; border: 2px solid var(--p); color: var(--p); padding: 20px 50px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 3px; pointer-events: auto; transition: 0.3s; margin-top: 15px; text-decoration: none; display: inline-block; text-align: center; }
-        .beast-btn:hover { background: var(--p); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
-        .btn-yt { border-color: #ff0000; color: #ff0000; } .btn-yt:hover { background: #ff0000; color: #fff; }
-        .btn-ps { border-color: #00ff66; color: #00ff66; } .btn-ps:hover { background: #00ff66; color: #000; }
-        .btn-pg { border-color: #ffaa00; color: #ffaa00; } .btn-pg:hover { background: #ffaa00; color: #000; }
+        /* NAVIGATION */
+        .back-btn { position: absolute; top: 15px; left: 15px; padding: 10px 20px; background: rgba(0,0,0,0.9); border: 2px solid var(--p); color: var(--p); font-family: 'Orbitron'; font-weight: 900; z-index: 1000; border-radius: 5px; }
+        .destruct-btn { background: rgba(255,0,0,0.1); border: 1px solid var(--red); color: var(--red); font-size: 0.65rem; padding: 10px; margin-top: 10px; width: 100%; font-weight: 900; border-radius: 5px; }
+        #shatter { position: fixed; inset: 0; background: #fff; z-index: 99999; display: none; }
 
-        /* GRAPHIC MODELS */
-        .torus { width: 300px; height: 300px; border: 10px double var(--p); border-radius: 50%; animation: rot 5s infinite linear; position: relative; box-shadow: var(--glow), inset var(--glow); }
-        .fractal { width: 100px; height: 100px; background: rgba(255,0,0,0.2); border: 2px solid #f00; position: absolute; animation: explode 3s infinite alternate; }
+        /* 3D VIEWPORT */
+        .center-stage { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .viewport-3d { width: 250px; height: 250px; transform-style: preserve-3d; margin-bottom: 30px; }
+        .reactor { width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--p); animation: spin3D 4s linear infinite; box-shadow: var(--glow), inset var(--glow); }
+        .radar { width: 100%; height: 100%; border: 2px solid var(--p); border-radius: 50%; position: relative; overflow: hidden; }
+        .radar-beam { position: absolute; width: 50%; height: 2px; background: var(--p); top: 50%; left: 50%; transform-origin: left center; animation: radarScan 2s linear infinite; }
 
-        @keyframes rot { from { transform: rotateX(70deg) rotateZ(0); } to { transform: rotateX(70deg) rotateZ(360deg); } }
-        @keyframes pulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
-        @keyframes l-in { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes explode { 0% { transform: scale(1) rotate(0); } 100% { transform: scale(2.5) rotate(180deg); opacity: 0; } }
+        /* ACTION BUTTONS */
+        .action-area { text-align: center; }
+        .b-btn { display: inline-block; padding: 15px 40px; border: 2px solid var(--p); background: transparent; color: var(--p); text-decoration: none; font-weight: 900; letter-spacing: 2px; font-size: 1rem; border-radius: 40px; transition: 0.3s; margin-top: 10px; }
+        .b-btn:hover { background: var(--p); color: #000; box-shadow: var(--glow); }
+
+        /* ANIMATIONS */
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 20px #0f0; } 50% { box-shadow: 0 0 50px #0f0; } }
+        @keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
+        @keyframes floating { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+        @keyframes spin3D { from { transform: rotateY(0) rotateX(30deg); } to { transform: rotateY(360deg) rotateX(30deg); } }
+        @keyframes radarScan { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+        @keyframes slideR { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* RESPONSIVE BREAKPOINT */
+        @media (max-width: 850px) {
+            #container { grid-template-columns: 1fr; grid-template-rows: 60px 1fr 120px; }
+            aside { grid-row: 3; }
+            .logo-text { font-size: 1.1rem; }
+            .viewport-3d { width: 180px; height: 180px; }
+            .grid { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
-<body onload="initParticles()">
+<body onload="initSpace()">
 
-    <div id="handshake" onclick="startBoot()">
-        <div class="h-btn">INITIATE BEAST MODE</div>
-        <div style="margin-top:20px; font-family:'Source Code Pro'; color:#0f0;">AUTHORIZATION: SKYRO APEX</div>
+    <div id="handshake" onclick="boot()">
+        <div class="hand-scanner"><div class="scan-line"></div></div>
+        <div style="margin-top:15px; color:#0f0; font-family:'Source Code Pro'; font-size:0.8rem;">AUTHENTICATION: REQUIRED</div>
     </div>
 
-    <div id="boot">
-        <div id="boot-status" style="color:#0f0; font-size:1.5rem; letter-spacing:5px;">OPTIMIZING 3D ENGINE...</div>
-        <div class="b-bar"><div class="b-fill" id="b-fill"></div></div>
-    </div>
+    <div id="shatter"></div>
 
-    <canvas id="bg-canvas" style="position:fixed; inset:0; z-index:0;"></canvas>
+    <canvas id="stars" style="position:fixed; inset:0; z-index:0;"></canvas>
 
-    <div id="app">
-        <header>
-            <div class="logo">SKYRO APEX <span style="font-size: 1rem; opacity: 0.5;">// V10 GOD-MODE</span></div>
-            <div style="text-align:right; font-family:'Source Code Pro'; font-size:0.8rem;">ENGINE: VOLUMETRIC_S10<br>STATUS: UNLEASHED</div>
-        </header>
-
-        <aside>
-            <div style="font-family:'Orbitron'; border-bottom:1px solid var(--p); margin-bottom:15px; padding-bottom:5px;">SYSTEM_LOGS</div>
-            <div id="log"></div>
-        </aside>
-
-        <main id="view-port"></main>
+    <div id="ui-wrapper">
+        <div id="container">
+            <header class="glass"><div class="logo-text">SKYRO APEX OS</div><div id="status" style="color:#0f0; font-size:0.7rem;">STATUS: ONLINE</div></header>
+            <aside class="glass">
+                <div id="terminal"></div>
+                <button class="destruct-btn" onclick="destruct()">RED_PROTOCOL</button>
+            </aside>
+            <main class="glass" id="viewport"></main>
+        </div>
     </div>
 
     <script>
-        const cards = [
-            { id: 'skyro', name: 'PROJECT SKYRO', icon: '⚛', color: '#00f2ff', desc: 'Volumetric 3D Exoskeleton' },
-            { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', desc: 'Global Media: YouTube' },
-            { id: 'mk4', name: 'MARK 4', icon: '❖', color: '#00ff66', desc: 'App Mainframe: PlayStore' },
-            { id: 'mk7', name: 'MARK 7', icon: '⚔', color: '#ffaa00', desc: 'Tactical Combat: PUBG' },
-            { id: 'mk50', name: 'MARK 50', icon: '💧', color: '#b300ff', desc: 'Nanotech Fluidics' },
-            { id: 'mk85', name: 'MARK 85', icon: '♾', color: '#ffffff', desc: 'Dimensional Singularity' },
-            { id: 'mk1', name: 'MARK 1', icon: '⚙', color: '#888888', desc: 'Legacy Hardware' }
+        const nodes = [
+            { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', link: 'https://youtube.com', label: 'YOUTUBE' },
+            { id: 'mk4', name: 'MARK 4', icon: '❖', color: '#00ff66', link: 'https://play.google.com', label: 'PLAY STORE' },
+            { id: 'mk5', name: 'MARK 5', icon: '⚔', color: '#ffaa00', link: 'https://www.pubgmobile.com', label: 'PUBG MOBILE' },
+            { id: 'mk50', name: 'MARK 50', icon: '⚙', color: '#b300ff', link: 'chrome://settings', label: 'SETTINGS' },
+            { id: 'mk85', name: 'MARK 85', icon: '∑', color: '#ffffff', link: 'https://www.google.com/search?q=calculator', label: 'CALCULATOR' },
+            { id: 'mk1', name: 'MARK 1', icon: '🗺', color: '#00f2ff', link: 'https://maps.google.com', label: 'GOOGLE MAPS' },
+            { id: 'skyro', name: 'APEX', icon: '⚛', color: '#00f2ff', link: '#', label: 'VOLUMETRIC' }
         ];
 
-        let activeId = 'home';
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let dots = [];
+        let active = 'home';
+        const stars = document.getElementById('stars'), sctx = stars.getContext('2d');
+        let starArr = [];
 
-        function speak(t) {
-            try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.7; u.rate=1.1; window.speechSynthesis.speak(u); } catch(e){}
+        function speak(t) { try { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.pitch=0.8; u.rate=1; window.speechSynthesis.speak(u); } catch(e){} }
+
+        function boot() {
+            speak("Welcome Skyro. System online.");
+            document.getElementById('handshake').style.display='none';
+            const ui = document.getElementById('ui-wrapper'); ui.style.display='block'; setTimeout(()=>ui.style.opacity='1', 100);
+            render();
         }
 
-        function startBoot() {
-            speak("Welcome Boss. Unleashing Apex Beast Mode.");
-            document.getElementById('handshake').style.display='none';
-            document.getElementById('boot').style.display='flex';
-            let w=0;
-            const int = setInterval(() => {
-                w += Math.random()*15;
-                document.getElementById('b-fill').style.width = w+'%';
-                if(w>40) document.getElementById('boot-status').innerText = "CALIBRATING 3D SHADERS...";
-                if(w>80) document.getElementById('boot-status').innerText = "ENGAGING VOLUMETRIC CORE...";
-                if(w>=100) { clearInterval(int); document.getElementById('boot').style.display='none'; document.getElementById('app').style.opacity='1'; renderView(); }
-            }, 100);
+        function initSpace() {
+            stars.width = window.innerWidth; stars.height = window.innerHeight;
+            for(let i=0; i<150; i++) starArr.push({x:Math.random()*stars.width, y:Math.random()*stars.height, z:Math.random()*stars.width});
+            drawSpace();
+        }
+
+        function drawSpace() {
+            sctx.fillStyle = '#000'; sctx.fillRect(0,0,stars.width,stars.height);
+            starArr.forEach(s => {
+                s.z -= 2; if(s.z<=0) s.z=stars.width;
+                const px = (s.x - stars.width/2) * (stars.width/s.z) + stars.width/2;
+                const py = (s.y - stars.height/2) * (stars.width/s.z) + stars.height/2;
+                sctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--p');
+                sctx.beginPath(); sctx.arc(px,py, (1-s.z/stars.width)*2, 0, Math.PI*2); sctx.fill();
+            }); requestAnimationFrame(drawSpace);
         }
 
         function log(m) {
-            const l = document.getElementById('log');
-            const e = document.createElement('div');
-            e.className = 'log-e';
-            e.innerHTML = `[${new Date().toLocaleTimeString()}] ${m}`;
-            l.prepend(e);
+            const t = document.getElementById('terminal'), d = document.createElement('div');
+            d.className = 'log-ln'; d.innerHTML = `> ${m}`; t.prepend(d);
         }
 
-        function initParticles() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            dots = [];
-            for(let i=0; i<200; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*canvas.width, s: Math.random()*2});
-            animate();
+        function destruct() {
+            speak("Self destruction initiated. Goodbye Boss.");
+            document.getElementById('shatter').style.display = 'block';
+            setTimeout(()=>location.reload(), 2000);
         }
 
-        function animate() {
-            ctx.fillStyle = 'rgba(0,5,10,0.2)';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            const color = getComputedStyle(document.body).getPropertyValue('--p').trim();
-            dots.forEach(d => {
-                d.z -= 5; if(d.z <= 0) d.z = canvas.width;
-                const x = (d.x - canvas.width/2) * (canvas.width/d.z) + canvas.width/2;
-                const y = (d.y - canvas.height/2) * (canvas.width/d.z) + canvas.height/2;
-                const sz = (1 - d.z/canvas.width) * 5;
-                ctx.beginPath(); ctx.arc(x,y,sz,0,Math.PI*2); ctx.fillStyle = color; ctx.fill();
-            });
-            requestAnimationFrame(animate);
-        }
+        function navigate(id) { active = id; render(); }
 
-        function navigate(id) { activeId = id; renderView(); }
-
-        function renderView() {
-            const v = document.getElementById('view-port');
-            log(`SWITCHING_UPLINK: ${activeId.toUpperCase()}`);
-            if(activeId === 'home') {
-                v.innerHTML = `<div class="grid">${cards.map(c => `
-                    <div class="card" onclick="navigate('${c.id}')">
-                        <div class="card-icon" style="color:${c.color}; font-size:4rem; text-shadow: 0 0 20px ${c.color};">${c.icon}</div>
-                        <div class="card-title" style="color:${c.color}">${c.name}</div>
-                        <div style="font-size:0.9rem; opacity:0.7;">${c.desc}</div>
-                    </div>`).join('')}</div>`;
+        function render() {
+            const v = document.getElementById('viewport');
+            log(`UPLINK: ${active.toUpperCase()}`);
+            
+            if(active === 'home') {
                 document.body.style.setProperty('--p', '#00f2ff');
+                v.innerHTML = `<div class="grid">${nodes.map(n => `
+                    <div class="card" onclick="navigate('${n.id}')">
+                        <span class="icon-3d" style="color:${n.color}">${n.icon}</span>
+                        <div style="font-size:1rem; color:${n.color}">${n.name}</div>
+                    </div>`).join('')}</div>`;
             } else {
-                const c = cards.find(x => x.id === activeId);
-                document.body.style.setProperty('--p', c.color);
-                speak(`Deploying ${c.name}`);
-                
-                let graphic = `<div class="center-obj"><div class="torus"></div></div>`;
-                if(activeId === 'mk3') graphic = `<div class="center-obj"><div class="torus" style="border-color:#f00; box-shadow:0 0 50px #f00;"></div><div style="position:absolute; font-size:10rem; color:#f00; text-shadow:0 0 50px #f00;">▶</div></div>`;
-                if(activeId === 'mk4') graphic = `<div class="center-obj"><div class="torus" style="border-color:#0f6; box-shadow:0 0 50px #0f6;"></div><div style="position:absolute; font-size:10rem; color:#0f6; text-shadow:0 0 50px #0f6;">❖</div></div>`;
-                if(activeId === 'mk7') graphic = `<div class="center-obj"><div class="torus" style="border-color:#fa0; box-shadow:0 0 50px #fa0;"></div><div style="position:absolute; font-size:10rem; color:#fa0; text-shadow:0 0 50px #fa0;">⚔</div></div>`;
+                const node = nodes.find(n => n.id === active);
+                document.body.style.setProperty('--p', node.color);
+                speak(`Accessing ${node.name}`);
 
-                let buttons = `<a href="#" class="beast-btn" onclick="navigate('home')">CLOSE SYSTEM</a>`;
-                if(activeId === 'mk3') buttons = `<a href="https://youtube.com" target="_blank" class="beast-btn btn-yt">OPEN YOUTUBE MAIN FRAME</a><br>` + buttons;
-                if(activeId === 'mk4') buttons = `<a href="https://play.google.com" target="_blank" class="beast-btn btn-ps">OPEN GOOGLE PLAY MATRIX</a><br>` + buttons;
-                if(activeId === 'mk7') buttons = `<a href="https://www.pubgmobile.com" target="_blank" class="beast-btn btn-pg">OPEN TACTICAL COMBAT</a><br>` + buttons;
+                let graphic = `<div class="reactor"></div>`;
+                if(active === 'mk5') graphic = `<div class="radar"><div class="radar-beam"></div></div>`;
 
                 v.innerHTML = `
-                    <div class="dashboard-view" style="width:100%; height:100%;">
-                        ${graphic}
-                        <div class="hud-overlay">
-                            <div class="data-box" style="border-left:5px solid var(--p); padding:20px; background:rgba(0,0,0,0.8);">
-                                <h1 style="font-family:'Orbitron'; font-size:4rem;">${c.name}</h1>
-                                <p>> UPLINK STATUS: SECURE</p>
-                                <p>> GRAPHIC CORE: VOLUMETRIC</p>
-                            </div>
-                            <div style="text-align:right;">
-                                ${buttons}
-                            </div>
+                    <button class="back-btn" onclick="navigate('home')">BACK</button>
+                    <div class="center-stage">
+                        <div class="viewport-3d">${graphic}</div>
+                        <div class="action-area">
+                            <h1 style="font-size:2.5rem; text-shadow:0 0 20px ${node.color}">${node.name}</h1>
+                            <p style="font-size:0.7rem; letter-spacing:3px; margin-bottom:20px;">SYSTEM_${node.label}_ACTIVE</p>
+                            <a href="${node.link}" target="_blank" class="b-btn" style="border-color:${node.color}; color:${node.color}">OPEN ${node.label}</a>
+                            <br><a href="#" class="b-btn" onclick="navigate('home')" style="font-size:0.7rem; border:none;">CLOSE</a>
                         </div>
                     </div>`;
             }
