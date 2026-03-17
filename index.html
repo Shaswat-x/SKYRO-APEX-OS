@@ -24,9 +24,10 @@
         #container { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: 150px 1fr; height: 100vh; padding: 25px; gap: 25px; }
         @media (max-width: 1000px) {
             #container { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; padding: 15px; }
-            aside { grid-row: 3; height: 160px; }
+            aside { grid-row: 3; height: 260px; }
             .logo-text { font-size: 1.8rem !important; }
             .grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+            .action-btns { flex-direction: column; gap: 5px; }
         }
 
         header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
@@ -34,9 +35,21 @@
         .logo-text { font-size: 3rem; font-weight: 900; letter-spacing: 10px; text-shadow: var(--glow); text-transform: uppercase; }
         .tagline { font-size: 0.9rem; letter-spacing: 5px; opacity: 0.8; margin-top: 5px; color: var(--p); }
 
+        .action-btns { display: flex; gap: 15px; }
+        .top-btn { border: 2px solid var(--p); color: var(--p); padding: 10px 20px; font-weight: 900; background: transparent; cursor: pointer; font-family: 'Orbitron'; letter-spacing: 2px; transition: 0.3s; box-shadow: var(--glow); }
+        .top-btn:active { transform: scale(0.95); background: var(--p); color: #000; }
+        .nitro-btn { border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(255,0,60,0.5); }
+        .nitro-btn:active { background: var(--red); color: #fff; }
+
         aside { display: flex; flex-direction: column; overflow: hidden; }
-        #speedo-wrap { padding: 30px; text-align: center; border-bottom: 1px solid rgba(0,242,255,0.1); }
+        #speedo-wrap { padding: 20px; text-align: center; border-bottom: 1px solid rgba(0,242,255,0.1); }
         .gauge-val { font-size: 3.5rem; font-weight: 900; text-shadow: var(--glow); }
+
+        .hud-module { padding: 15px 20px; border-bottom: 1px solid rgba(0,242,255,0.1); font-family: 'Source Code Pro'; }
+        .hud-label { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 5px; text-transform: uppercase; }
+        .hud-val { font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; }
+        .stat-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 8px; position: relative; overflow: hidden; }
+        .stat-fill { position: absolute; top:0; left:0; height:100%; background: var(--p); box-shadow: var(--glow); transition: 0.5s; }
 
         main { position: relative; overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; padding: 25px; transform-style: preserve-3d; }
@@ -71,7 +84,7 @@
 
     <div id="loader">
         <div class="load-ring"></div>
-        <div style="margin-top:30px; font-family:'Source Code Pro'; letter-spacing:8px; font-size:0.7rem;">CALIBRATING CITADEL CORE...</div>
+        <div style="margin-top:30px; font-family:'Source Code Pro'; letter-spacing:8px; font-size:0.7rem;">CALIBRATING VOCAL MATRICES...</div>
     </div>
 
     <div id="handshake" onclick="boot()">
@@ -88,14 +101,34 @@
                     <div class="logo-text">Skyro | <span style="font-weight:300; opacity:0.7;">by Shaswat</span></div>
                     <div class="tagline">appnexus : your digital citadel</div>
                 </div>
-                <button style="border:2px solid var(--red); color:var(--red); padding:10px 20px; font-weight:900; background:transparent; cursor:pointer;" onclick="toggleNitro()">NITRO</button>
+                <div class="action-btns">
+                    <button class="top-btn" onclick="startVoiceCommand()">🎙️ VOICE UPLINK</button>
+                    <button class="top-btn nitro-btn" onclick="toggleNitro()">NITRO</button>
+                </div>
             </header>
             <aside class="glass">
                 <div id="speedo-wrap">
                     <div class="gauge-val" id="speedo">000</div>
                     <div style="letter-spacing:5px; opacity:0.6; font-size:0.7rem;">MACH VELOCITY</div>
                 </div>
-                <div id="terminal" style="flex-grow:1; overflow-y:auto; padding:20px; font-family:'Source Code Pro'; font-size:0.7rem; line-height:2;"></div>
+
+                <div class="hud-module">
+                    <div class="hud-label">Temporal Matrix</div>
+                    <div class="hud-val" id="clock">00:00:00</div>
+                </div>
+
+                <div class="hud-module">
+                    <div class="hud-label">Vitality HUD</div>
+                    <div class="hud-val" id="batt-txt">100%</div>
+                    <div class="stat-bar"><div class="stat-fill" id="batt-bar" style="width: 100%;"></div></div>
+                </div>
+
+                <div class="hud-module">
+                    <div class="hud-label">Network Uplink</div>
+                    <div class="hud-val" id="net-txt">STABLE</div>
+                </div>
+
+                <div id="terminal" style="flex-grow:1; overflow-y:auto; padding:20px; font-family:'Source Code Pro'; font-size:0.6rem; line-height:2; opacity: 0.5;"></div>
             </aside>
             <main class="glass" id="viewport"></main>
         </div>
@@ -117,8 +150,67 @@
         const sCanvas = document.getElementById('spark-canvas'), sCtx = sCanvas.getContext('2d');
         let sparks = [];
 
+        /* AI VOICE COMMAND (SPEECH RECOGNITION) LOGIC */
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const command = event.results[0][0].transcript.toLowerCase();
+                log(`MIC DETECTED: "${command}"`);
+                
+                if (command.includes("open youtube")) navigate('mk3');
+                else if (command.includes("open play store")) navigate('mk4');
+                else if (command.includes("open pubg")) navigate('mk5');
+                else if (command.includes("open instagram")) navigate('mk50');
+                else if (command.includes("open flipkart")) navigate('mk85');
+                else if (command.includes("open aws")) navigate('mk7');
+                else if (command.includes("open maps") || command.includes("open google maps")) navigate('mk1');
+                else if (command.includes("open architect") || command.includes("open apex")) navigate('apex');
+                else {
+                    speak("Command not recognized, Boss. Please try again.");
+                }
+            };
+
+            recognition.onerror = function(event) {
+                log(`VOICE ERROR: ${event.error}`);
+            };
+        }
+
+        function startVoiceCommand() {
+            if (!recognition) {
+                speak("Voice uplink is not supported by this browser.");
+                log("SYS_ERR: WebKit Speech Recognition missing.");
+                return;
+            }
+            playSound(1000);
+            speak("Listening for directive.");
+            setTimeout(() => { recognition.start(); }, 1200); 
+        }
+
+        /* EXISTING HUD & MODULES */
+        function updateHUD() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+            if(navigator.getBattery) {
+                navigator.getBattery().then(b => {
+                    const level = Math.floor(b.level * 100);
+                    document.getElementById('batt-txt').innerText = level + "%";
+                    document.getElementById('batt-bar').style.width = level + "%";
+                });
+            }
+            document.getElementById('net-txt').innerText = navigator.onLine ? "SECURE" : "OFFLINE";
+        }
+        setInterval(updateHUD, 1000);
+
         function playSound(f) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
             o.type = 'square'; o.frequency.setValueAtTime(f, audioCtx.currentTime);
             g.gain.setValueAtTime(0.04, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
@@ -130,10 +222,7 @@
             const y = e.clientY || (e.touches ? e.touches[0].clientY : window.innerHeight/2);
             const color = getComputedStyle(document.body).getPropertyValue('--p');
             for(let i=0; i<60; i++) {
-                sparks.push({
-                    x, y, vx: (Math.random()-0.5)*30, vy: (Math.random()-0.5)*30,
-                    life: 1.0, color: color, size: Math.random()*4 + 1
-                });
+                sparks.push({ x, y, vx: (Math.random()-0.5)*30, vy: (Math.random()-0.5)*30, life: 1.0, color: color, size: Math.random()*4 + 1 });
             }
         }
 
@@ -158,14 +247,12 @@
             sCanvas.width = window.innerWidth * dpr; sCanvas.height = window.innerHeight * dpr;
             sCtx.scale(dpr, dpr);
             initSpace(); updateSparks();
-            setTimeout(() => { 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('handshake').style.display = 'flex';
-            }, 1200);
+            setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('handshake').style.display = 'flex'; }, 1200);
         }
 
         function boot() {
-            playSound(600); speak("Welcome to SKYRO by Shaswat.");
+            playSound(600); 
+            speak("Welcome to SKYRO by Shaswat. All systems are operational.");
             document.getElementById('handshake').style.display='none';
             document.getElementById('ui-wrapper').style.display='block';
             setTimeout(()=>document.getElementById('ui-wrapper').style.opacity='1', 100);
