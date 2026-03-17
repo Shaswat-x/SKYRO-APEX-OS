@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyro's | APEX V9 VOLUMETRIC</title>
+    <title>Skyro's | APEX V9.2 MATRIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Source+Code+Pro:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00f2ff; --bg: #010409; --glow: 0 0 30px rgba(0, 242, 255, 0.6); }
@@ -55,8 +55,15 @@
         .data-box { background: rgba(0,0,0,0.9); border: 2px solid var(--primary); padding: 30px; font-family: 'Source Code Pro'; font-size: 1.1rem; text-shadow: var(--glow); box-shadow: var(--glow); }
         .btn { background: #000; border: 2px solid var(--primary); color: var(--primary); padding: 15px 40px; font-family: 'Orbitron'; cursor: pointer; transition: 0.2s; text-transform: uppercase; pointer-events: auto; font-weight: 900; }
         .btn:hover { background: var(--primary); color: #000; box-shadow: var(--glow); transform: scale(1.1); }
+        
+        /* EXTERNAL UPLINK BUTTONS */
+        .btn-yt { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); margin-bottom: 15px; }
+        .btn-yt:hover { background: #ff0000; color: #fff; box-shadow: 0 0 30px #ff0000; transform: scale(1.05); }
+        
+        .btn-ps { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); margin-bottom: 15px; }
+        .btn-ps:hover { background: #00ffcc; color: #000; box-shadow: 0 0 30px #00ffcc; transform: scale(1.05); }
 
-        /* --- 3D ANIMATIONS (MINIFIED CSS) --- */
+        /* --- 3D ANIMATIONS --- */
         .mk3-reactor { width: 100%; height: 100%; transform-style: preserve-3d; animation: spinXY 10s linear infinite; }
         .mk3-r { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 3px solid var(--primary); transform: translate(-50%, -50%); box-shadow: var(--glow), inset var(--glow); }
         .mk3-core { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--primary) 60%, transparent); animation: pulseCore 0.5s infinite alternate; filter: blur(5px); }
@@ -103,10 +110,10 @@
 
     <div id="app">
         <header>
-            <div class="logo">SKYRO'S <span style="font-size: 1.2rem; font-weight: 300; opacity: 0.5;">// VOLUMETRIC V9</span></div>
+            <div class="logo">SKYRO'S <span style="font-size: 1.2rem; font-weight: 300; opacity: 0.5;">// MATRIX V9.2</span></div>
             <div style="font-family: 'Source Code Pro'; font-size: 0.9rem; text-align: right; color: #0f0; text-shadow: 0 0 10px #0f0;">AWS SERVER: BEAST-MODE<br>LATENCY: 0.1ms</div>
         </header>
-        <aside class="terminal"><div class="term-header" style="font-family:'Orbitron'; color:var(--primary); border-bottom:1px solid var(--primary); margin-bottom:10px;">NEURAL_NET_v13</div><div id="log-stream"></div></aside>
+        <aside class="terminal"><div class="term-header" style="font-family:'Orbitron'; color:var(--primary); border-bottom:1px solid var(--primary); margin-bottom:10px;">NEURAL_NET_v15</div><div id="log-stream"></div></aside>
         <main id="router-view"></main>
     </div>
 
@@ -124,22 +131,20 @@
         let activeRoute = 'home', sysInit = false;
         const canvas = document.getElementById('particle-engine'), ctx = canvas.getContext('2d');
         let particles = [];
-        let mechParticles = [];
-        let mechAngle = 0;
-        let mechAnimId;
+        let mechParticles = [], mechAngle = 0, mechAnimId;
 
         function startBoot() {
             document.getElementById('handshake').style.display = 'none'; document.getElementById('boot-screen').style.display = 'flex';
-            const s = window.speechSynthesis, u = new SpeechSynthesisUtterance("Welcome Skyro. Mainframe operational. Volumetric engine online. Awaiting your command, Boss."); u.pitch = 0.8; u.rate = 1.05;
+            const s = window.speechSynthesis, u = new SpeechSynthesisUtterance("Welcome Skyro. Mainframe operational. Matrix protocols online. Awaiting your command, Boss."); u.pitch = 0.8; u.rate = 1.05;
             let w = 0; const bootInt = setInterval(() => {
                 w += Math.random()*15; if(w>100) w=100; document.getElementById('b-fill').style.width = w+'%';
-                if(w>30) document.getElementById('boot-txt').innerText = "GENERATING 3D MATRICES...";
+                if(w>30) document.getElementById('boot-txt').innerText = "CONFIGURING MEDIA UPLINKS...";
                 if(w>70) document.getElementById('boot-txt').innerText = "UNLEASHING BEAST MODE...";
                 if(w>=100) { clearInterval(bootInt); s.speak(u); setTimeout(() => { document.getElementById('boot-screen').style.display = 'none'; document.getElementById('app').style.opacity = '1'; initSystem(); }, 500); }
             }, 200);
         }
 
-        function initSystem() { sysInit = true; resize(); window.addEventListener('resize', resize); initParticles(); drawParticles(); logAction("APEX V9: VOLUMETRIC ENGINE ONLINE."); window.addEventListener('hashchange', handleRouting); handleRouting(); }
+        function initSystem() { sysInit = true; resize(); window.addEventListener('resize', resize); initParticles(); drawParticles(); logAction("APEX V9.2: MATRIX ENGINE ONLINE."); window.addEventListener('hashchange', handleRouting); handleRouting(); }
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         function initParticles() { particles = []; for(let i=0; i<300; i++) particles.push({ x: Math.random()*canvas.width-canvas.width/2, y: Math.random()*canvas.height-canvas.height/2, z: Math.random()*canvas.width, a: Math.random()*Math.PI*2, s: Math.random()*5+2 }); }
 
@@ -149,8 +154,7 @@
             particles.forEach((p, i) => {
                 if(activeRoute === 'skyro' || activeRoute === 'home') {
                     p.a += 0.01; p.x += Math.cos(p.a)*1; p.y += Math.sin(p.a)*1; if(Math.abs(p.x)>cx) p.x*=-1; if(Math.abs(p.y)>cy) p.y*=-1;
-                    ctx.beginPath(); ctx.arc(p.x+cx, p.y+cy, 2, 0, Math.PI*2); ctx.fillStyle = color; ctx.globalAlpha=0.5; ctx.fill();
-                    ctx.globalAlpha=1;
+                    ctx.beginPath(); ctx.arc(p.x+cx, p.y+cy, 2, 0, Math.PI*2); ctx.fillStyle = color; ctx.globalAlpha=0.5; ctx.fill(); ctx.globalAlpha=1;
                 } else if(activeRoute === 'mk3' || activeRoute === 'mk85') {
                     p.z -= (activeRoute==='mk3'?20:5); if(p.z<=0){ p.x=Math.random()*canvas.width-cx; p.y=Math.random()*canvas.height-cy; p.z=canvas.width; }
                     let x = cx+(p.x/p.z)*canvas.width, y = cy+(p.y/p.z)*canvas.width; ctx.beginPath(); ctx.arc(x, y, (1-p.z/canvas.width)*5, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
@@ -162,66 +166,36 @@
             }); requestAnimationFrame(drawParticles);
         }
 
-        // ==========================================
-        // THE BEAST: VOLUMETRIC POINT-CLOUD ENGINE
-        // ==========================================
         function generateMech() {
             mechParticles = [];
             for(let i=0; i<4000; i++) {
-                let x = (Math.random()-0.5)*200;
-                let y = (Math.random()-0.5)*350;
-                let z = (Math.random()-0.5)*100;
-                
-                let v = false;
-                // Head
+                let x = (Math.random()-0.5)*200, y = (Math.random()-0.5)*350, z = (Math.random()-0.5)*100, v = false;
                 if (x*x + (y+130)*(y+130) + z*z < 25*25) v = true;
-                // Torso (V-Shape taper)
                 let w = 45 - (y+80)*0.15;
                 if (!v && y>-90 && y<30 && Math.abs(x) < w && Math.abs(z) < 25) v = true;
-                // Reactor Core
                 let glow = false;
                 if (x*x + (y+50)*(y+50) + (z-25)*(z-25) < 18*18) { v = true; glow = true; }
-                // Shoulders & Arms
                 if (!v && Math.abs(x)>40 && Math.abs(x)<70 && y>-80 && y<50 && Math.abs(z)<15) v = true;
-                // Legs
                 if (!v && Math.abs(x)>10 && Math.abs(x)<40 && y>30 && y<170 && Math.abs(z)<20) v = true;
-
                 if(v) mechParticles.push({x:x, y:y, z:z, oX:x, oY:y, oZ:z, g:glow});
             }
         }
 
         function drawMech() {
             if(activeRoute !== 'skyro') { cancelAnimationFrame(mechAnimId); return; }
-            const c = document.getElementById('mech-canvas');
-            if(!c) return;
-            const cx = c.getContext('2d');
-            cx.clearRect(0,0,c.width,c.height);
-            
-            mechAngle += 0.015;
-            let cos = Math.cos(mechAngle), sin = Math.sin(mechAngle);
-            let midX = c.width/2, midY = c.height/2;
-
+            const c = document.getElementById('mech-canvas'); if(!c) return;
+            const cx = c.getContext('2d'); cx.clearRect(0,0,c.width,c.height);
+            mechAngle += 0.015; let cos = Math.cos(mechAngle), sin = Math.sin(mechAngle), midX = c.width/2, midY = c.height/2;
             mechParticles.forEach(p => {
-                let hov = Math.sin(Date.now()*0.002 + p.oX)*3; // Hover effect
-                
-                // 3D Rotation Matrix
-                let rx = p.oX * cos - p.oZ * sin;
-                let rz = p.oZ * cos + p.oX * sin;
-                let ry = p.oY + hov;
-
-                let scale = 400 / (400 + rz); 
-                let px = midX + rx * scale * 1.5;
-                let py = midY + ry * scale * 1.5;
-
-                cx.beginPath();
-                cx.arc(px, py, p.g ? 3*scale : 1.2*scale, 0, Math.PI*2);
+                let hov = Math.sin(Date.now()*0.002 + p.oX)*3;
+                let rx = p.oX * cos - p.oZ * sin, rz = p.oZ * cos + p.oX * sin, ry = p.oY + hov;
+                let scale = 400 / (400 + rz), px = midX + rx * scale * 1.5, py = midY + ry * scale * 1.5;
+                cx.beginPath(); cx.arc(px, py, p.g ? 3*scale : 1.2*scale, 0, Math.PI*2);
                 cx.fillStyle = p.g ? '#fff' : `rgba(0, 242, 255, ${0.2 + scale*0.6})`;
                 if(p.g) { cx.shadowBlur = 15; cx.shadowColor = '#00ffff'; } else { cx.shadowBlur = 0; }
                 cx.fill();
-            });
-            mechAnimId = requestAnimationFrame(drawMech);
+            }); mechAnimId = requestAnimationFrame(drawMech);
         }
-        // ==========================================
 
         document.addEventListener('mousemove', (e) => {
             document.getElementById('hud-v').style.left = e.clientX+'px'; document.getElementById('hud-h').style.top = e.clientY+'px';
@@ -230,34 +204,4 @@
             const s = document.getElementById('center-stage'); if(s) s.style.transform = `translate(-50%, -50%) rotateY(${(window.innerWidth/2 - e.clientX)/15}deg) rotateX(${(window.innerHeight/2 - e.clientY)/15}deg)`;
         });
 
-        function logAction(msg) { const s = document.getElementById('log-stream'), e = document.createElement('div'); e.className='log-entry'; e.innerHTML=`[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`; s.prepend(e); }
-        function speak(text) { const s = window.speechSynthesis, u = new SpeechSynthesisUtterance(text); u.pitch=0.7; u.rate=1.1; s.speak(u); }
-        function navigate(path) { logAction(`ROUTING: /#${path}`); window.location.hash = path; }
-
-        function handleRouting() {
-            activeRoute = window.location.hash.replace('#', '') || 'home'; const view = document.getElementById('router-view'); document.body.className = ''; initParticles(); 
-            if (activeRoute === 'home') {
-                view.innerHTML = `<div class="grid">${suits.map(s => `<div class="card ${s.isMaster?'master':''}" onclick="navigate('${s.id}')"><div style="font-family:'Source Code Pro'; font-size:1rem; opacity:0.6; margin-bottom:10px;">> ${s.class}</div><div class="card-title">${s.name}</div><div style="font-size:1rem; border-top:1px solid ${s.isMaster?'#fff':'var(--border)'}; padding-top:15px; font-weight:700;">${s.desc}</div></div>`).join('')}</div>`;
-            } else {
-                document.body.classList.add(`theme-${activeRoute}`); const suit = suits.find(s => s.id === activeRoute); if(sysInit) speak(`Deploying ${suit.name}.`);
-                let h = '';
-                
-                // THE BEAST: VOLUMETRIC CANVAS INJECTION
-                if(activeRoute === 'skyro') {
-                    h = `<canvas id="mech-canvas" width="600" height="600"></canvas>`;
-                    setTimeout(() => { generateMech(); drawMech(); }, 100);
-                }
-                else if(activeRoute === 'mk3') h = `<div class="mk3-reactor"><div class="mk3-r mk3-r1" style="width:400px; height:400px; animation:spinX 4s linear infinite;"></div><div class="mk3-r" style="width:320px; height:320px; border-style:dashed; animation:spinY 5s linear infinite reverse;"></div><div class="mk3-core"></div></div>`;
-                else if(activeRoute === 'mk5') h = `<div class="mk5-core">${Array(20).fill(0).map(()=>`<div class="mk5-s" style="--dx:${(Math.random()-0.5)*500}px; --dy:${(Math.random()-0.5)*500}px; --dz:${(Math.random()-0.5)*500}px; animation-delay:-${Math.random()*4}s;"></div>`).join('')}</div>`;
-                else if(activeRoute === 'mk7') h = `<div class="mk7-gyro"><div class="mk7-a" style="transform:rotateX(45deg); animation:spinY 3s linear infinite;"></div><div class="mk7-a" style="transform:rotateY(45deg); animation:spinX 4s linear infinite;"></div><div class="mk7-laser"></div></div>`;
-                else if(activeRoute === 'mk42') h = `<div class="mk42-swarm">${Array(50).fill(0).map((_,i)=>`<div class="mk42-p" style="transform:rotateY(${i*20}deg) rotateX(${Math.random()*360}deg) translateY(-200px); animation:pulseCore ${(Math.random()*2)+1}s infinite alternate;"></div>`).join('')}</div>`;
-                else if(activeRoute === 'mk50') h = `<div class="mk50-liquid"><div class="mk50-b" style="width:200px; height:200px; animation:spinX 3s infinite;"></div><div class="mk50-b" style="width:150px; height:150px; margin-left:80px; animation:spinY 4s infinite;"></div><div class="mk50-b" style="width:180px; height:180px; margin-top:80px; animation:spinXY 5s infinite;"></div></div>`;
-                else if(activeRoute === 'mk85') h = `<div class="mk85-tunnel"><div class="mk85-h" style="border-color:#f00; animation-delay:0s;"></div><div class="mk85-h" style="border-color:#ff0; animation-delay:-1s;"></div><div class="mk85-h" style="border-color:#0f0; animation-delay:-2s;"></div><div class="mk85-h" style="border-color:#00f; animation-delay:-3s;"></div></div>`;
-
-                view.innerHTML = `<div class="dashboard-view"><div class="center-stage" id="center-stage">${h}</div><div class="hud-panels"><div class="data-box" style="border-left:10px solid var(--primary);"><h2 style="font-family:'Orbitron'; font-size:3rem;">${suit.name}</h2>> CLASS: ${suit.class}<br>> VOLUMETRIC LINK: <span id="s-val" style="color:#fff;">SYNCING</span></div><div class="data-box" style="text-align:right; border-right:10px solid var(--primary);">> SYSTEM: BEAST-MODE<br><button class="btn" style="margin-top:20px;" onclick="navigate('home')">ARCHIVE</button></div></div></div>`;
-                if(window.liveInt) clearInterval(window.liveInt); window.liveInt = setInterval(() => { const s=document.getElementById('s-val'); if(s) s.innerText='0x'+Math.floor(Math.random()*16777215).toString(16).toUpperCase(); }, 50);
-            }
-        }
-    </script>
-</body>
-</html>
+        function logAction(msg) { const s = document.getElementById('log-stream'), e = document.createElement('div'); e.className='log-entry'; e.innerHTML=`[${new Date().toLocaleT
