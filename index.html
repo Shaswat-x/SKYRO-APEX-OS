@@ -96,6 +96,12 @@
         
         body.protocol-zero { --p: #ff0000; --glow: 0 0 80px #ff0000; animation: pzShake 0.4s infinite; filter: contrast(120%); }
         @keyframes pzShake { 0% { transform: translate(2px, 1px) rotate(0deg); } 25% { transform: translate(-1px, -2px) rotate(-1deg); } 50% { transform: translate(-3px, 0px) rotate(1deg); } 75% { transform: translate(3px, 2px) rotate(0deg); } 100% { transform: translate(1px, -1px) rotate(-1deg); } }
+
+        /* --- V27 HOLO-WINDOW ADDITIONS --- */
+        .holo-window { transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
+        .win-btn { background: transparent; border: 1px solid var(--p); color: var(--p); padding: 4px 10px; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; margin-left: 5px; transition: 0.2s; }
+        .win-btn:hover { background: var(--p); color: #000; }
+        .win-btn.close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
     </style>
 </head>
 <body onload="initSystem()">
@@ -390,35 +396,49 @@
 
         function navigate(id) { playSound(800); active = id; render(); }
 
-        /* NEW: HOLO-PANEL OS WINDOW LOGIC */
+        /* --- V27 HOLO-PANEL OS WINDOW LOGIC --- */
+        let globalZIndex = 86000;
+
         function openHoloPanel(url, title) {
             playSound(1100);
             const container = document.getElementById('holo-container');
             const pId = 'holo-' + Math.random().toString(36).substr(2, 9);
+            const activeNode = nodes.find(n => n.id === active);
+            const color = activeNode ? activeNode.color : 'var(--p)';
             
             const panel = document.createElement('div');
-            panel.className = 'glass';
+            panel.className = 'holo-window glass';
             panel.id = pId;
             panel.style.position = 'absolute';
-            panel.style.top = '15%'; panel.style.left = '30%';
-            panel.style.width = '60%'; panel.style.height = '70%';
+            panel.style.top = (15 + Math.random() * 5) + '%'; 
+            panel.style.left = (30 + Math.random() * 5) + '%';
+            panel.style.width = '60%'; 
+            panel.style.height = '70%';
             panel.style.pointerEvents = 'auto';
-            panel.style.display = 'flex'; panel.style.flexDirection = 'column';
-            panel.style.boxShadow = 'var(--glow)';
-            panel.style.border = '2px solid var(--p)';
+            panel.style.display = 'flex'; 
+            panel.style.flexDirection = 'column';
+            panel.style.boxShadow = `0 0 30px ${color}44`;
+            panel.style.border = `2px solid ${color}`;
+            panel.style.zIndex = ++globalZIndex;
             
             panel.innerHTML = `
-                <div class="holo-header" style="padding:15px; background:rgba(0,242,255,0.1); cursor:grab; display:flex; justify-content:space-between; font-weight:900; border-bottom:1px solid var(--p); color:var(--p);">
+                <div class="holo-header" style="padding:15px; background:${color}22; cursor:grab; display:flex; justify-content:space-between; align-items:center; font-weight:900; border-bottom:1px solid ${color}; color:${color}; user-select:none;">
                     <span>[SYS_UPLINK] :: ${title.toUpperCase()}</span>
-                    <span style="cursor:pointer; color:var(--red);" onclick="document.getElementById('${pId}').remove(); playSound(800);">[ TERMINATE ]</span>
-                </div>
-                <div style="flex-grow:1; position:relative;">
-                    <iframe src="${url}" style="width:100%; height:100%; border:none; background:#fff;"></iframe>
-                    <div style="position:absolute; bottom:10px; right:10px; font-size:0.7rem; background:#000; padding:5px; border: 1px solid var(--p);">
-                        <a href="${url}" target="_blank" style="color:var(--p); text-decoration:none; font-weight:900;">UPLINK BLOCKED? [FORCE SECURE ROUTE]</a>
+                    <div class="win-controls">
+                        <button class="win-btn" onclick="document.getElementById('${pId}').style.zIndex = ++globalZIndex;">FOCUS</button>
+                        <button class="win-btn close-btn" onclick="closeWin('${pId}')">TERMINATE</button>
                     </div>
                 </div>
+                <div style="flex-grow:1; position:relative; display:flex; flex-direction:column;">
+                    <iframe src="${url}" style="width:100%; height:100%; border:none; background:#fff; flex-grow:1;"></iframe>
+                    <div style="position:absolute; bottom:15px; right:20px; font-size:0.7rem; background:#000; padding:5px; border: 1px solid ${color}; pointer-events:none;">
+                        <a href="${url}" target="_blank" style="color:${color}; text-decoration:none; font-weight:900; pointer-events:auto;">UPLINK BLOCKED? [FORCE SECURE ROUTE]</a>
+                    </div>
+                    <div class="resizer" style="width:15px; height:15px; position:absolute; right:0; bottom:0; cursor:nwse-resize; background:linear-gradient(135deg, transparent 50%, ${color} 50%);"></div>
+                </div>
             `;
+            
+            panel.addEventListener('mousedown', () => panel.style.zIndex = ++globalZIndex);
             container.appendChild(panel);
             
             // Drag Logic
@@ -427,16 +447,44 @@
             
             header.addEventListener('mousedown', (e) => {
                 isDragging = true; startX = e.clientX; startY = e.clientY;
-                startLeft = parseInt(panel.style.left, 10) || panel.offsetLeft;
-                startTop = parseInt(panel.style.top, 10) || panel.offsetTop;
+                startLeft = panel.offsetLeft; startTop = panel.offsetTop;
                 header.style.cursor = 'grabbing';
+                panel.style.zIndex = ++globalZIndex;
             });
             window.addEventListener('mousemove', (e) => {
                 if(!isDragging) return;
                 panel.style.left = startLeft + (e.clientX - startX) + 'px';
                 panel.style.top = startTop + (e.clientY - startY) + 'px';
             });
-            window.addEventListener('mouseup', () => { isDragging = false; header.style.cursor = 'grab'; });
+            window.addEventListener('mouseup', () => { 
+                if(isDragging) { isDragging = false; header.style.cursor = 'grab'; }
+            });
+
+            // Resize Logic
+            const resizer = panel.querySelector('.resizer');
+            let isResizing = false, startW, startH, startRX, startRY;
+            resizer.addEventListener('mousedown', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                isResizing = true; startRX = e.clientX; startRY = e.clientY;
+                startW = panel.offsetWidth; startH = panel.offsetHeight;
+                panel.style.zIndex = ++globalZIndex;
+            });
+            window.addEventListener('mousemove', (e) => {
+                if(!isResizing) return;
+                panel.style.width = startW + (e.clientX - startRX) + 'px';
+                panel.style.height = startH + (e.clientY - startRY) + 'px';
+            });
+            window.addEventListener('mouseup', () => { isResizing = false; });
+        }
+
+        function closeWin(id) {
+            playSound(400);
+            const el = document.getElementById(id);
+            if(el) {
+                el.style.transform = "scale(0.8) translateY(50px)";
+                el.style.opacity = "0";
+                setTimeout(() => el.remove(), 200);
+            }
         }
 
         /* NEW: PROTOCOL ZERO LOCKDOWN LOGIC */
