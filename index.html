@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Skyro by Shaswat | AppNexus Citadel</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-
     <style>
         :root { --p: #00f2ff; --bg: #000105; --red: #ff003c; --aws: #FF9900; --glow: 0 0 50px rgba(0, 242, 255, 0.8); }
         body.nitro { --p: #ff003c; --glow: 0 0 80px rgba(255, 0, 60, 1); }
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
-        body, html { background: #000; color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 3000px; touch-action: manipulation; transition: transform 0.3s ease-out; }
+        body, html { background: #000; color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 3000px; touch-action: manipulation; }
 
         #loader { position: fixed; inset: 0; background: #000; z-index: 100000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .load-ring { width: 100px; height: 100px; border: 3px solid rgba(0, 242, 255, 0.1); border-top: 3px solid var(--p); border-radius: 50%; animation: spin 0.6s linear infinite; box-shadow: var(--glow); }
@@ -100,8 +96,7 @@
         body.protocol-zero { --p: #ff0000; --glow: 0 0 80px #ff0000; animation: pzShake 0.4s infinite; filter: contrast(120%); }
         @keyframes pzShake { 0% { transform: translate(2px, 1px) rotate(0deg); } 25% { transform: translate(-1px, -2px) rotate(-1deg); } 50% { transform: translate(-3px, 0px) rotate(1deg); } 75% { transform: translate(3px, 2px) rotate(0deg); } 100% { transform: translate(1px, -1px) rotate(-1deg); } }
 
-        /* V27 HOLO-WINDOW ADDITIONS */
-        .holo-window { transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
+        /* HOLO-WINDOW BUTTONS */
         .win-btn { background: transparent; border: 1px solid var(--p); color: var(--p); padding: 4px 10px; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; margin-left: 5px; transition: 0.2s; }
         .win-btn:hover { background: var(--p); color: #000; }
         .win-btn.close-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
@@ -192,13 +187,6 @@
         </div>
     </div>
 
-    <div id="holo-cursor" style="position:fixed; width:30px; height:30px; border:2px solid #0ff; border-radius:50%; pointer-events:none; z-index:999999; transform:translate(-50%, -50%); transition: background 0.1s, transform 0.1s, border-color 0.1s; box-shadow: 0 0 10px #0ff;"></div>
-    <div id="optic-sensor" style="position:fixed; bottom:20px; left:20px; z-index:90000; border: 1px solid rgba(0,255,255,0.5); border-radius: 5px; overflow: hidden; width: 160px; height: 120px; background: #000; box-shadow: 0 0 15px rgba(0,255,255,0.2);">
-        <video class="input_video" style="display:none;"></video>
-        <canvas class="output_canvas" width="160" height="120"></canvas>
-        <div id="gesture-status" style="position:absolute; bottom:0; width:100%; background:rgba(0,255,255,0.2); color:#0ff; text-align:center; font-family:monospace; font-size:10px; padding: 2px 0; transition: 0.2s;">OPTICS STANDBY</div>
-    </div>
-
     <script>
         const nodes = [
             { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', link: 'https://youtube.com', label: 'YouTube' },
@@ -214,7 +202,6 @@
         let active = 'home', isNitro = false, speed = 0, targetSpeed = 0, audioCtx;
         const sCanvas = document.getElementById('spark-canvas'), sCtx = sCanvas.getContext('2d');
         let sparks = [];
-        let currentSystemZoom = 1;
 
         /* AI VOICE COMMAND (SPEECH RECOGNITION) */
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -238,14 +225,6 @@
                 else if (command.includes("open aws")) navigate('mk7');
                 else if (command.includes("open maps") || command.includes("open google maps")) navigate('mk1');
                 else if (command.includes("open architect") || command.includes("open apex")) navigate('apex');
-                
-                else if (command.includes("zoom in")) { setSystemZoom(currentSystemZoom + 0.1); speak("Zooming in."); }
-                else if (command.includes("zoom out")) { setSystemZoom(currentSystemZoom - 0.1); speak("Zooming out."); }
-                else if (command.includes("minimize") || command.includes("close window")) { minimizeActiveWindow(); speak("Window minimized."); }
-                else if (command.includes("swipe left") || command.includes("go back")) { navigate('home'); speak("Swiping left, returning home."); }
-                else if (command.includes("pause") || command.includes("stop")) { targetSpeed = 0; speak("System paused."); }
-                else if (command.includes("swipe right") || command.includes("nitro")) { toggleNitro(); }
-                
                 else {
                     speak("Command not recognized, Boss. Please try again.");
                 }
@@ -261,20 +240,6 @@
             }
             playSound(1000); speak("Listening for directive.");
             setTimeout(() => { recognition.start(); }, 1200); 
-        }
-
-        function setSystemZoom(level) {
-            currentSystemZoom = Math.max(0.5, Math.min(level, 2)); 
-            document.body.style.transform = `scale(${currentSystemZoom})`;
-            document.body.style.transformOrigin = "center center";
-            log(`SYS :: ZOOM LEVEL SET TO ${Math.round(currentSystemZoom * 100)}%`);
-        }
-
-        function minimizeActiveWindow() {
-            const wins = document.querySelectorAll('.holo-window');
-            if(wins.length > 0) {
-                closeWin(wins[wins.length-1].id); 
-            }
         }
 
         async function fetchAtmosphere() {
@@ -363,29 +328,12 @@
         }
 
         function initSystem() {
-            // 1. FORCE BOOT TO PREVENT INFINITE LOADING
-            setTimeout(() => { 
-                document.getElementById('loader').style.display = 'none'; 
-                document.getElementById('handshake').style.display = 'flex'; 
-            }, 1200);
-
-            // 2. Initialize Visuals
             const dpr = window.devicePixelRatio || 1;
             sCanvas.width = window.innerWidth * dpr; sCanvas.height = window.innerHeight * dpr;
             sCtx.scale(dpr, dpr);
             initSpace(); updateSparks();
             fetchAtmosphere(); 
-
-            // 3. Initialize Optics (With Firewall Bypass)
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                initOptics();
-            } else {
-                const status = document.getElementById('gesture-status');
-                status.innerText = "CAMERA BLOCKED - USE LIVE SERVER";
-                status.style.color = "#ff0000";
-                status.style.background = "rgba(255,0,0,0.2)";
-                log("SYS_WARNING: Browser blocked camera. Use VS Code Live Server for Hand Gestures.");
-            }
+            setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('handshake').style.display = 'flex'; }, 1200);
         }
 
         function boot() {
@@ -445,7 +393,7 @@
 
         function navigate(id) { playSound(800); active = id; render(); }
 
-        /* --- V27 HOLO-PANEL OS WINDOW LOGIC WITH SECURE ROUTING --- */
+        /* WINDOW LOGIC */
         let globalZIndex = 86000;
 
         function openHoloPanel(originalUrl, title) {
@@ -455,29 +403,14 @@
             const activeNode = nodes.find(n => n.id === active);
             const color = activeNode ? activeNode.color : 'var(--p)';
             
-            let secureUrl = originalUrl;
-            let isBlocked = false;
-
-            if (secureUrl.includes('youtube.com')) {
-                secureUrl = 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1'; 
-            } else if (secureUrl.includes('maps.google')) {
-                secureUrl = 'https://maps.google.com/maps?q=Hyderabad&output=embed'; ';
-            } else if (secureUrl.includes('aws.amazon.com') || secureUrl.includes('instagram.com') || secureUrl.includes('flipkart.com') || secureUrl.includes('play.google.com')) {
-                secureUrl = 'about:blank'; 
-                isBlocked = true; 
-            }
-            
             const panel = document.createElement('div');
             panel.className = 'holo-window glass';
             panel.id = pId;
             panel.style.position = 'absolute';
-            panel.style.top = (15 + Math.random() * 5) + '%'; 
-            panel.style.left = (30 + Math.random() * 5) + '%';
-            panel.style.width = '60%'; 
-            panel.style.height = '70%';
+            panel.style.top = '15%'; panel.style.left = '30%';
+            panel.style.width = '60%'; panel.style.height = '70%';
             panel.style.pointerEvents = 'auto';
-            panel.style.display = 'flex'; 
-            panel.style.flexDirection = 'column';
+            panel.style.display = 'flex'; panel.style.flexDirection = 'column';
             panel.style.boxShadow = `0 0 30px ${color}44`;
             panel.style.border = `2px solid ${color}`;
             panel.style.zIndex = ++globalZIndex;
@@ -486,21 +419,11 @@
                 <div class="holo-header" style="padding:15px; background:${color}22; cursor:grab; display:flex; justify-content:space-between; align-items:center; font-weight:900; border-bottom:1px solid ${color}; color:${color}; user-select:none;">
                     <span>[SYS_UPLINK] :: ${title.toUpperCase()}</span>
                     <div class="win-controls">
-                        <button class="win-btn" onclick="document.getElementById('${pId}').style.zIndex = ++globalZIndex;">FOCUS</button>
                         <button class="win-btn close-btn" onclick="closeWin('${pId}')">TERMINATE</button>
                     </div>
                 </div>
-                <div style="flex-grow:1; position:relative; display:flex; flex-direction:column; background:#000;">
-                    
-                    <iframe src="${secureUrl}" style="width:100%; height:100%; border:none; background:${isBlocked ? '#000' : '#fff'}; flex-grow:1; display:${isBlocked ? 'none' : 'block'};"></iframe>
-                    
-                    <div style="position:absolute; inset:0; display:${isBlocked ? 'flex' : 'none'}; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;">
-                        <h2 style="color:var(--red); letter-spacing:5px; margin-bottom:10px;">[ FIREWALL DETECTED ]</h2>
-                        <p style="color:${color}; font-size:0.8rem; opacity:0.8; margin-bottom:25px; line-height:1.5;">Target server (${title}) has strict security protocols.<br>Direct internal rendering is prohibited.</p>
-                        <a href="${originalUrl}" target="_blank" style="padding:15px 30px; border:2px solid ${color}; color:${color}; text-decoration:none; font-weight:900; box-shadow:0 0 15px ${color}44; transition:0.3s; cursor:crosshair;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">INITIATE SECURE EXTERNAL UPLINK</a>
-                    </div>
-                    
-                    <div class="resizer" style="width:15px; height:15px; position:absolute; right:0; bottom:0; cursor:nwse-resize; background:linear-gradient(135deg, transparent 50%, ${color} 50%);"></div>
+                <div style="flex-grow:1; background:#000;">
+                    <iframe src="${originalUrl}" style="width:100%; height:100%; border:none;"></iframe>
                 </div>
             `;
             
@@ -514,63 +437,41 @@
                 isDragging = true; startX = e.clientX; startY = e.clientY;
                 startLeft = panel.offsetLeft; startTop = panel.offsetTop;
                 header.style.cursor = 'grabbing';
-                panel.style.zIndex = ++globalZIndex;
             });
             window.addEventListener('mousemove', (e) => {
                 if(!isDragging) return;
                 panel.style.left = startLeft + (e.clientX - startX) + 'px';
                 panel.style.top = startTop + (e.clientY - startY) + 'px';
             });
-            window.addEventListener('mouseup', () => { 
-                if(isDragging) { isDragging = false; header.style.cursor = 'grab'; }
-            });
-
-            const resizer = panel.querySelector('.resizer');
-            let isResizing = false, startW, startH, startRX, startRY;
-            resizer.addEventListener('mousedown', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                isResizing = true; startRX = e.clientX; startRY = e.clientY;
-                startW = panel.offsetWidth; startH = panel.offsetHeight;
-                panel.style.zIndex = ++globalZIndex;
-            });
-            window.addEventListener('mousemove', (e) => {
-                if(!isResizing) return;
-                panel.style.width = startW + (e.clientX - startRX) + 'px';
-                panel.style.height = startH + (e.clientY - startRY) + 'px';
-            });
-            window.addEventListener('mouseup', () => { isResizing = false; });
+            window.addEventListener('mouseup', () => { isDragging = false; header.style.cursor = 'grab'; });
         }
 
         function closeWin(id) {
             playSound(400);
             const el = document.getElementById(id);
-            if(el) {
-                el.style.transform = "scale(0.8) translateY(50px)";
-                el.style.opacity = "0";
-                setTimeout(() => el.remove(), 200);
-            }
+            if(el) el.remove();
         }
 
-        /* PROTOCOL ZERO LOCKDOWN LOGIC */
+        /* PROTOCOL ZERO */
         let pzActive = false;
         function triggerProtocolZero() {
             if(pzActive) return;
             pzActive = true;
             document.body.classList.add('protocol-zero');
             playSound(150); playSound(200);
-            speak("Warning. Unauthorized access detected. Initiating Protocol Zero. Citadel Lockdown engaged.");
+            speak("Unauthorized access detected. Initiating Protocol Zero.");
             
-            document.querySelectorAll('.card-label, .hud-label, .gauge-val, .logo-text, .tagline').forEach(el => {
+            document.querySelectorAll('.card-label, .hud-label, .gauge-val').forEach(el => {
                 el.dataset.orig = el.innerText;
                 el.innerText = scrambleText(el.innerText);
             });
 
             setTimeout(() => {
-                let code = prompt("CITADEL LOCKED. ENTER ARCHITECT OVERRIDE CODE:");
+                let code = prompt("ENTER OVERRIDE CODE:");
                 if(code && (code.toUpperCase() === "SHASWAT" || code.toUpperCase() === "BOSS")) {
                     pzActive = false;
                     document.body.classList.remove('protocol-zero');
-                    speak("Override accepted. Welcome back, Architect.");
+                    speak("Override accepted.");
                     document.querySelectorAll('[data-orig]').forEach(el => el.innerText = el.dataset.orig);
                 } else {
                     pzActive = false;
@@ -586,147 +487,18 @@
 
         function render() {
             const v = document.getElementById('viewport');
-            log(`STARK_LINK: ${active.toUpperCase()}`);
             if(active === 'home') {
                 v.innerHTML = `<div class="grid">${nodes.map(n => `<div class="card" onclick="navigate('${n.id}')"><span style="font-size:4.5rem;display:block;color:${n.color}">${n.icon}</span><div class="card-label" style="color:${n.color}">${n.label}</div></div>`).join('')}</div>`;
             } else {
                 const n = nodes.find(x => x.id === active);
                 speak(`Opening ${n.label}.`);
                 let content = active === 'apex' 
-                    ? `<div style="font-size:3rem;font-weight:900;text-align:center;line-height:1.5;">DESIGNED AND CREATED<br>BY<br>SHASWAT MOHANTY</div>` 
-                    : `<div class="viewport-3d" style="perspective:1000px;">
-                           <div class="eye-socket" style="width:100%;height:100%;transition:transform 0.1s ease-out;transform-style:preserve-3d;">
-                               <div class="reactor-core"></div>
-                           </div>
-                       </div>
+                    ? `<div style="font-size:3rem;font-weight:900;text-align:center;">DESIGNED BY SHASWAT</div>` 
+                    : `<div class="viewport-3d"><div class="eye-socket"><div class="reactor-core"></div></div></div>
                        <h1 style="font-size:4.5rem;text-shadow:0 0 50px ${n.color};">${n.name}</h1>
-                       <a href="#" class="open-btn" style="border-color:${n.color};color:${n.color}" onclick="openHoloPanel('${n.link}', '${n.name}'); createSparks(event); return false;">OPEN ${n.label.toUpperCase()}</a>`;
+                       <a href="#" class="open-btn" style="border-color:${n.color};color:${n.color}" onclick="openHoloPanel('${n.link}', '${n.name}'); return false;">OPEN ${n.label.toUpperCase()}</a>`;
                 v.innerHTML = `<a href="#" class="back-btn" onclick="navigate('home')">BACK</a><div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">${content}</div>`;
             }
-        }
-
-        /* --- V27 KINETIC OPTICS (HAND TRACKING) --- */
-        let lastHandX = null, lastHandY = null, lastHandSpan = null;
-        let gestureTimer = Date.now();
-
-        function updateSensorText(msg, color) {
-            const statusText = document.getElementById('gesture-status');
-            statusText.innerText = msg;
-            statusText.style.color = color;
-            statusText.style.background = `rgba(${color === '#ff0000' ? '255,0,0' : color === '#0ff' ? '0,255,255' : '0,255,0'},0.2)`;
-        }
-
-        function initOptics() {
-            const videoElement = document.querySelector('.input_video');
-            const canvasElement = document.querySelector('.output_canvas');
-            const canvasCtx = canvasElement.getContext('2d');
-            const holoCursor = document.getElementById('holo-cursor');
-
-            function onResults(results) {
-                canvasCtx.save();
-                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    const landmarks = results.multiHandLandmarks[0];
-                    const indexFinger = landmarks[8], thumb = landmarks[4], pinky = landmarks[20];
-
-                    // Move Cursor
-                    const cx = (1 - indexFinger.x) * window.innerWidth;
-                    const cy = indexFinger.y * window.innerHeight;
-                    holoCursor.style.left = `${cx}px`;
-                    holoCursor.style.top = `${cy}px`;
-
-                    // Tracker dot
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(indexFinger.x * 160, indexFinger.y * 120, 5, 0, 2 * Math.PI);
-                    canvasCtx.fillStyle = "#0ff";
-                    canvasCtx.fill();
-
-                    if (Date.now() - gestureTimer < 800) return; 
-
-                    // PINCH TO CLICK
-                    const pinchDist = Math.hypot(indexFinger.x - thumb.x, indexFinger.y - thumb.y);
-                    if (pinchDist < 0.05) {
-                        updateSensorText("[ PINCH / CLICK ]", "#ff0000");
-                        holoCursor.style.transform = "translate(-50%, -50%) scale(0.5)";
-                        holoCursor.style.background = "rgba(255,0,0,0.5)";
-                        
-                        const elementUnderCursor = document.elementFromPoint(cx, cy);
-                        if (elementUnderCursor && elementUnderCursor.click) {
-                            elementUnderCursor.click();
-                        }
-                        gestureTimer = Date.now() - 300; 
-                        return;
-                    } else {
-                        holoCursor.style.transform = "translate(-50%, -50%) scale(1)";
-                        holoCursor.style.background = "transparent";
-                    }
-
-                    // SWIPE, ZOOM, MINIMIZE
-                    if (lastHandX !== null) {
-                        const dx = indexFinger.x - lastHandX;
-                        const dy = indexFinger.y - lastHandY;
-                        const span = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
-                        const dSpan = span - lastHandSpan;
-
-                        // SWIPE
-                        if (Math.abs(dx) > 0.08 && Math.abs(dy) < 0.05) {
-                            if (dx > 0) { navigate('home'); updateSensorText("[ SWIPE LEFT ]", "#0ff"); } 
-                            else { toggleNitro(); updateSensorText("[ SWIPE RIGHT ]", "#0ff"); }
-                            gestureTimer = Date.now();
-                            return;
-                        }
-
-                        // MINIMIZE
-                        if (dy > 0.1 && Math.abs(dx) < 0.05) {
-                            updateSensorText("[ MINIMIZE ]", "#ffaa00");
-                            minimizeActiveWindow();
-                            gestureTimer = Date.now();
-                            return;
-                        }
-
-                        // ZOOM
-                        if (Math.abs(dSpan) > 0.05) {
-                            if (dSpan > 0) { setSystemZoom(currentSystemZoom + 0.1); updateSensorText("[ ZOOM IN ]", "#00ff66"); } 
-                            else { setSystemZoom(currentSystemZoom - 0.1); updateSensorText("[ ZOOM OUT ]", "#ff003c"); }
-                            gestureTimer = Date.now();
-                            return;
-                        }
-
-                        // PAUSE
-                        const isOpen = span > 0.15;
-                        if (isOpen && Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
-                            updateSensorText("[ SYSTEM PAUSED ]", "#fff");
-                            targetSpeed = 0; 
-                        } else {
-                            updateSensorText("[ TRACKING ACTIVE ]", "#0ff");
-                        }
-                    }
-                    lastHandX = indexFinger.x; lastHandY = indexFinger.y; lastHandSpan = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
-
-                } else {
-                    updateSensorText("SCANNING...", "#888");
-                    lastHandX = null; lastHandY = null; lastHandSpan = null;
-                }
-                canvasCtx.restore();
-            }
-
-            const hands = new Hands({locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-            }});
-            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7 });
-            hands.onResults(onResults);
-
-            const camera = new Camera(videoElement, {
-                onFrame: async () => { await hands.send({image: videoElement}); },
-                width: 160, height: 120
-            });
-            camera.start().catch(err => {
-                const status = document.getElementById('gesture-status');
-                status.innerText = "CAMERA BLOCKED - USE LIVE SERVER";
-                status.style.color = "#ff0000";
-            });
         }
     </script>
 </body>
