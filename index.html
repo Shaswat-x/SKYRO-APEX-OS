@@ -214,7 +214,7 @@
         let active = 'home', isNitro = false, speed = 0, targetSpeed = 0, audioCtx;
         const sCanvas = document.getElementById('spark-canvas'), sCtx = sCanvas.getContext('2d');
         let sparks = [];
-        let currentSystemZoom = 1; // Tracks OS Zoom level
+        let currentSystemZoom = 1;
 
         /* AI VOICE COMMAND (SPEECH RECOGNITION) */
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -230,7 +230,6 @@
                 const command = event.results[0][0].transcript.toLowerCase();
                 log(`MIC DETECTED: "${command}"`);
                 
-                // Original Navigation Commands
                 if (command.includes("open youtube")) navigate('mk3');
                 else if (command.includes("open play store")) navigate('mk4');
                 else if (command.includes("open pubg")) navigate('mk5');
@@ -240,7 +239,6 @@
                 else if (command.includes("open maps") || command.includes("open google maps")) navigate('mk1');
                 else if (command.includes("open architect") || command.includes("open apex")) navigate('apex');
                 
-                // NEW: Real-Time UI Control Commands
                 else if (command.includes("zoom in")) { setSystemZoom(currentSystemZoom + 0.1); speak("Zooming in."); }
                 else if (command.includes("zoom out")) { setSystemZoom(currentSystemZoom - 0.1); speak("Zooming out."); }
                 else if (command.includes("minimize") || command.includes("close window")) { minimizeActiveWindow(); speak("Window minimized."); }
@@ -266,7 +264,7 @@
         }
 
         function setSystemZoom(level) {
-            currentSystemZoom = Math.max(0.5, Math.min(level, 2)); // Lock zoom between 50% and 200%
+            currentSystemZoom = Math.max(0.5, Math.min(level, 2)); 
             document.body.style.transform = `scale(${currentSystemZoom})`;
             document.body.style.transformOrigin = "center center";
             log(`SYS :: ZOOM LEVEL SET TO ${Math.round(currentSystemZoom * 100)}%`);
@@ -275,7 +273,7 @@
         function minimizeActiveWindow() {
             const wins = document.querySelectorAll('.holo-window');
             if(wins.length > 0) {
-                closeWin(wins[wins.length-1].id); // Closes the most recent window
+                closeWin(wins[wins.length-1].id); 
             }
         }
 
@@ -365,13 +363,29 @@
         }
 
         function initSystem() {
+            // 1. FORCE BOOT TO PREVENT INFINITE LOADING
+            setTimeout(() => { 
+                document.getElementById('loader').style.display = 'none'; 
+                document.getElementById('handshake').style.display = 'flex'; 
+            }, 1200);
+
+            // 2. Initialize Visuals
             const dpr = window.devicePixelRatio || 1;
             sCanvas.width = window.innerWidth * dpr; sCanvas.height = window.innerHeight * dpr;
             sCtx.scale(dpr, dpr);
             initSpace(); updateSparks();
             fetchAtmosphere(); 
-            initOptics(); // Boot the Hand Tracking AI
-            setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('handshake').style.display = 'flex'; }, 1200);
+
+            // 3. Initialize Optics (With Firewall Bypass)
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                initOptics();
+            } else {
+                const status = document.getElementById('gesture-status');
+                status.innerText = "CAMERA BLOCKED - USE LIVE SERVER";
+                status.style.color = "#ff0000";
+                status.style.background = "rgba(255,0,0,0.2)";
+                log("SYS_WARNING: Browser blocked camera. Use VS Code Live Server for Hand Gestures.");
+            }
         }
 
         function boot() {
@@ -617,21 +631,21 @@
                     const landmarks = results.multiHandLandmarks[0];
                     const indexFinger = landmarks[8], thumb = landmarks[4], pinky = landmarks[20];
 
-                    // 1. Move Cursor
+                    // Move Cursor
                     const cx = (1 - indexFinger.x) * window.innerWidth;
                     const cy = indexFinger.y * window.innerHeight;
                     holoCursor.style.left = `${cx}px`;
                     holoCursor.style.top = `${cy}px`;
 
-                    // Draw Tracker dot on mini-map
+                    // Tracker dot
                     canvasCtx.beginPath();
                     canvasCtx.arc(indexFinger.x * 160, indexFinger.y * 120, 5, 0, 2 * Math.PI);
                     canvasCtx.fillStyle = "#0ff";
                     canvasCtx.fill();
 
-                    if (Date.now() - gestureTimer < 800) return; // Cooldown to prevent spam
+                    if (Date.now() - gestureTimer < 800) return; 
 
-                    // 2. PINCH TO CLICK / OPEN CARDS
+                    // PINCH TO CLICK
                     const pinchDist = Math.hypot(indexFinger.x - thumb.x, indexFinger.y - thumb.y);
                     if (pinchDist < 0.05) {
                         updateSensorText("[ PINCH / CLICK ]", "#ff0000");
@@ -649,27 +663,22 @@
                         holoCursor.style.background = "transparent";
                     }
 
-                    // 3. ADVANCED GESTURES (SWIPE, ZOOM, MINIMIZE)
+                    // SWIPE, ZOOM, MINIMIZE
                     if (lastHandX !== null) {
                         const dx = indexFinger.x - lastHandX;
                         const dy = indexFinger.y - lastHandY;
                         const span = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
                         const dSpan = span - lastHandSpan;
 
-                        // SWIPE LEFT / RIGHT
+                        // SWIPE
                         if (Math.abs(dx) > 0.08 && Math.abs(dy) < 0.05) {
-                            if (dx > 0) { // Physical Swipe Left (Camera is mirrored)
-                                updateSensorText("[ SWIPE LEFT ]", "#0ff");
-                                navigate('home');
-                            } else {      // Physical Swipe Right
-                                updateSensorText("[ SWIPE RIGHT ]", "#0ff");
-                                toggleNitro();
-                            }
+                            if (dx > 0) { navigate('home'); updateSensorText("[ SWIPE LEFT ]", "#0ff"); } 
+                            else { toggleNitro(); updateSensorText("[ SWIPE RIGHT ]", "#0ff"); }
                             gestureTimer = Date.now();
                             return;
                         }
 
-                        // MINIMIZE (Swipe Down)
+                        // MINIMIZE
                         if (dy > 0.1 && Math.abs(dx) < 0.05) {
                             updateSensorText("[ MINIMIZE ]", "#ffaa00");
                             minimizeActiveWindow();
@@ -677,29 +686,23 @@
                             return;
                         }
 
-                        // ZOOM IN / OUT (Hand spreading / closing)
+                        // ZOOM
                         if (Math.abs(dSpan) > 0.05) {
-                            if (dSpan > 0) {
-                                updateSensorText("[ ZOOM IN ]", "#00ff66");
-                                setSystemZoom(currentSystemZoom + 0.1);
-                            } else {
-                                updateSensorText("[ ZOOM OUT ]", "#ff003c");
-                                setSystemZoom(currentSystemZoom - 0.1);
-                            }
+                            if (dSpan > 0) { setSystemZoom(currentSystemZoom + 0.1); updateSensorText("[ ZOOM IN ]", "#00ff66"); } 
+                            else { setSystemZoom(currentSystemZoom - 0.1); updateSensorText("[ ZOOM OUT ]", "#ff003c"); }
                             gestureTimer = Date.now();
                             return;
                         }
 
-                        // PAUSE (Open hand, relatively still)
+                        // PAUSE
                         const isOpen = span > 0.15;
                         if (isOpen && Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
                             updateSensorText("[ SYSTEM PAUSED ]", "#fff");
-                            targetSpeed = 0; // Pauses the background nebula
+                            targetSpeed = 0; 
                         } else {
                             updateSensorText("[ TRACKING ACTIVE ]", "#0ff");
                         }
                     }
-
                     lastHandX = indexFinger.x; lastHandY = indexFinger.y; lastHandSpan = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
 
                 } else {
@@ -719,7 +722,11 @@
                 onFrame: async () => { await hands.send({image: videoElement}); },
                 width: 160, height: 120
             });
-            camera.start();
+            camera.start().catch(err => {
+                const status = document.getElementById('gesture-status');
+                status.innerText = "CAMERA BLOCKED - USE LIVE SERVER";
+                status.style.color = "#ff0000";
+            });
         }
     </script>
 </body>
