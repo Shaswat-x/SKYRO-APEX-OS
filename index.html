@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Skyro by Shaswat | AppNexus Citadel</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
     <style>
         :root { --p: #00f2ff; --bg: #000105; --red: #ff003c; --aws: #FF9900; --glow: 0 0 50px rgba(0, 242, 255, 0.8); }
         body.nitro { --p: #ff003c; --glow: 0 0 80px rgba(255, 0, 60, 1); }
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
-        body, html { background: #000; color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 3000px; touch-action: manipulation; }
+        body, html { background: #000; color: var(--p); font-family: 'Orbitron', sans-serif; height: 100vh; overflow: hidden; perspective: 3000px; touch-action: manipulation; transition: transform 0.3s ease-out; }
 
         #loader { position: fixed; inset: 0; background: #000; z-index: 100000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .load-ring { width: 100px; height: 100px; border: 3px solid rgba(0, 242, 255, 0.1); border-top: 3px solid var(--p); border-radius: 50%; animation: spin 0.6s linear infinite; box-shadow: var(--glow); }
@@ -188,6 +192,13 @@
         </div>
     </div>
 
+    <div id="holo-cursor" style="position:fixed; width:30px; height:30px; border:2px solid #0ff; border-radius:50%; pointer-events:none; z-index:999999; transform:translate(-50%, -50%); transition: background 0.1s, transform 0.1s, border-color 0.1s; box-shadow: 0 0 10px #0ff;"></div>
+    <div id="optic-sensor" style="position:fixed; bottom:20px; left:20px; z-index:90000; border: 1px solid rgba(0,255,255,0.5); border-radius: 5px; overflow: hidden; width: 160px; height: 120px; background: #000; box-shadow: 0 0 15px rgba(0,255,255,0.2);">
+        <video class="input_video" style="display:none;"></video>
+        <canvas class="output_canvas" width="160" height="120"></canvas>
+        <div id="gesture-status" style="position:absolute; bottom:0; width:100%; background:rgba(0,255,255,0.2); color:#0ff; text-align:center; font-family:monospace; font-size:10px; padding: 2px 0; transition: 0.2s;">OPTICS STANDBY</div>
+    </div>
+
     <script>
         const nodes = [
             { id: 'mk3', name: 'MARK 3', icon: '▶', color: '#ff0000', link: 'https://youtube.com', label: 'YouTube' },
@@ -196,13 +207,14 @@
             { id: 'mk50', name: 'MARK 50', icon: '📷', color: '#b300ff', link: 'https://instagram.com', label: 'Instagram' },
             { id: 'mk85', name: 'MARK 85', icon: '💎', color: '#ffffff', link: 'https://flipkart.com', label: 'Flipkart' },
             { id: 'mk7', name: 'MARK 7', icon: '☁️', color: '#FF9900', link: 'https://console.aws.amazon.com', label: 'AWS Console' },
-            { id: 'mk1', name: 'MARK 1', icon: '📡', color: '#00f2ff', link: 'https://maps.google.com', label: 'Google Maps' },
+            { id: 'mk1', name: 'MARK 1', icon: '📡', color: '#00f2ff', link: 'https://maps.google.com/maps?q=Hyderabad&output=embed'; ', label: 'Google Maps' },
             { id: 'apex', name: 'APEX', icon: '⚛', color: '#00f2ff', link: '#', label: 'Architect' }
         ];
 
         let active = 'home', isNitro = false, speed = 0, targetSpeed = 0, audioCtx;
         const sCanvas = document.getElementById('spark-canvas'), sCtx = sCanvas.getContext('2d');
         let sparks = [];
+        let currentSystemZoom = 1; // Tracks OS Zoom level
 
         /* AI VOICE COMMAND (SPEECH RECOGNITION) */
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -218,6 +230,7 @@
                 const command = event.results[0][0].transcript.toLowerCase();
                 log(`MIC DETECTED: "${command}"`);
                 
+                // Original Navigation Commands
                 if (command.includes("open youtube")) navigate('mk3');
                 else if (command.includes("open play store")) navigate('mk4');
                 else if (command.includes("open pubg")) navigate('mk5');
@@ -226,6 +239,15 @@
                 else if (command.includes("open aws")) navigate('mk7');
                 else if (command.includes("open maps") || command.includes("open google maps")) navigate('mk1');
                 else if (command.includes("open architect") || command.includes("open apex")) navigate('apex');
+                
+                // NEW: Real-Time UI Control Commands
+                else if (command.includes("zoom in")) { setSystemZoom(currentSystemZoom + 0.1); speak("Zooming in."); }
+                else if (command.includes("zoom out")) { setSystemZoom(currentSystemZoom - 0.1); speak("Zooming out."); }
+                else if (command.includes("minimize") || command.includes("close window")) { minimizeActiveWindow(); speak("Window minimized."); }
+                else if (command.includes("swipe left") || command.includes("go back")) { navigate('home'); speak("Swiping left, returning home."); }
+                else if (command.includes("pause") || command.includes("stop")) { targetSpeed = 0; speak("System paused."); }
+                else if (command.includes("swipe right") || command.includes("nitro")) { toggleNitro(); }
+                
                 else {
                     speak("Command not recognized, Boss. Please try again.");
                 }
@@ -241,6 +263,20 @@
             }
             playSound(1000); speak("Listening for directive.");
             setTimeout(() => { recognition.start(); }, 1200); 
+        }
+
+        function setSystemZoom(level) {
+            currentSystemZoom = Math.max(0.5, Math.min(level, 2)); // Lock zoom between 50% and 200%
+            document.body.style.transform = `scale(${currentSystemZoom})`;
+            document.body.style.transformOrigin = "center center";
+            log(`SYS :: ZOOM LEVEL SET TO ${Math.round(currentSystemZoom * 100)}%`);
+        }
+
+        function minimizeActiveWindow() {
+            const wins = document.querySelectorAll('.holo-window');
+            if(wins.length > 0) {
+                closeWin(wins[wins.length-1].id); // Closes the most recent window
+            }
         }
 
         async function fetchAtmosphere() {
@@ -334,6 +370,7 @@
             sCtx.scale(dpr, dpr);
             initSpace(); updateSparks();
             fetchAtmosphere(); 
+            initOptics(); // Boot the Hand Tracking AI
             setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.getElementById('handshake').style.display = 'flex'; }, 1200);
         }
 
@@ -404,14 +441,13 @@
             const activeNode = nodes.find(n => n.id === active);
             const color = activeNode ? activeNode.color : 'var(--p)';
             
-            // Secure Routing Engine
             let secureUrl = originalUrl;
             let isBlocked = false;
 
             if (secureUrl.includes('youtube.com')) {
                 secureUrl = 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1'; 
             } else if (secureUrl.includes('maps.google')) {
-                secureUrl = 'https://maps.google.com/maps?q=Hyderabad&output=embed'; 
+                secureUrl = 'https://maps.google.com/maps?q=Hyderabad&output=embed'; ';
             } else if (secureUrl.includes('aws.amazon.com') || secureUrl.includes('instagram.com') || secureUrl.includes('flipkart.com') || secureUrl.includes('play.google.com')) {
                 secureUrl = 'about:blank'; 
                 isBlocked = true; 
@@ -457,7 +493,6 @@
             panel.addEventListener('mousedown', () => panel.style.zIndex = ++globalZIndex);
             container.appendChild(panel);
             
-            // Drag Logic
             const header = panel.querySelector('.holo-header');
             let isDragging = false, startX, startY, startLeft, startTop;
             
@@ -476,7 +511,6 @@
                 if(isDragging) { isDragging = false; header.style.cursor = 'grab'; }
             });
 
-            // Resize Logic
             const resizer = panel.querySelector('.resizer');
             let isResizing = false, startW, startH, startRX, startRY;
             resizer.addEventListener('mousedown', (e) => {
@@ -555,6 +589,137 @@
                        <a href="#" class="open-btn" style="border-color:${n.color};color:${n.color}" onclick="openHoloPanel('${n.link}', '${n.name}'); createSparks(event); return false;">OPEN ${n.label.toUpperCase()}</a>`;
                 v.innerHTML = `<a href="#" class="back-btn" onclick="navigate('home')">BACK</a><div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">${content}</div>`;
             }
+        }
+
+        /* --- V27 KINETIC OPTICS (HAND TRACKING) --- */
+        let lastHandX = null, lastHandY = null, lastHandSpan = null;
+        let gestureTimer = Date.now();
+
+        function updateSensorText(msg, color) {
+            const statusText = document.getElementById('gesture-status');
+            statusText.innerText = msg;
+            statusText.style.color = color;
+            statusText.style.background = `rgba(${color === '#ff0000' ? '255,0,0' : color === '#0ff' ? '0,255,255' : '0,255,0'},0.2)`;
+        }
+
+        function initOptics() {
+            const videoElement = document.querySelector('.input_video');
+            const canvasElement = document.querySelector('.output_canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            const holoCursor = document.getElementById('holo-cursor');
+
+            function onResults(results) {
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    const landmarks = results.multiHandLandmarks[0];
+                    const indexFinger = landmarks[8], thumb = landmarks[4], pinky = landmarks[20];
+
+                    // 1. Move Cursor
+                    const cx = (1 - indexFinger.x) * window.innerWidth;
+                    const cy = indexFinger.y * window.innerHeight;
+                    holoCursor.style.left = `${cx}px`;
+                    holoCursor.style.top = `${cy}px`;
+
+                    // Draw Tracker dot on mini-map
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(indexFinger.x * 160, indexFinger.y * 120, 5, 0, 2 * Math.PI);
+                    canvasCtx.fillStyle = "#0ff";
+                    canvasCtx.fill();
+
+                    if (Date.now() - gestureTimer < 800) return; // Cooldown to prevent spam
+
+                    // 2. PINCH TO CLICK / OPEN CARDS
+                    const pinchDist = Math.hypot(indexFinger.x - thumb.x, indexFinger.y - thumb.y);
+                    if (pinchDist < 0.05) {
+                        updateSensorText("[ PINCH / CLICK ]", "#ff0000");
+                        holoCursor.style.transform = "translate(-50%, -50%) scale(0.5)";
+                        holoCursor.style.background = "rgba(255,0,0,0.5)";
+                        
+                        const elementUnderCursor = document.elementFromPoint(cx, cy);
+                        if (elementUnderCursor && elementUnderCursor.click) {
+                            elementUnderCursor.click();
+                        }
+                        gestureTimer = Date.now() - 300; 
+                        return;
+                    } else {
+                        holoCursor.style.transform = "translate(-50%, -50%) scale(1)";
+                        holoCursor.style.background = "transparent";
+                    }
+
+                    // 3. ADVANCED GESTURES (SWIPE, ZOOM, MINIMIZE)
+                    if (lastHandX !== null) {
+                        const dx = indexFinger.x - lastHandX;
+                        const dy = indexFinger.y - lastHandY;
+                        const span = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
+                        const dSpan = span - lastHandSpan;
+
+                        // SWIPE LEFT / RIGHT
+                        if (Math.abs(dx) > 0.08 && Math.abs(dy) < 0.05) {
+                            if (dx > 0) { // Physical Swipe Left (Camera is mirrored)
+                                updateSensorText("[ SWIPE LEFT ]", "#0ff");
+                                navigate('home');
+                            } else {      // Physical Swipe Right
+                                updateSensorText("[ SWIPE RIGHT ]", "#0ff");
+                                toggleNitro();
+                            }
+                            gestureTimer = Date.now();
+                            return;
+                        }
+
+                        // MINIMIZE (Swipe Down)
+                        if (dy > 0.1 && Math.abs(dx) < 0.05) {
+                            updateSensorText("[ MINIMIZE ]", "#ffaa00");
+                            minimizeActiveWindow();
+                            gestureTimer = Date.now();
+                            return;
+                        }
+
+                        // ZOOM IN / OUT (Hand spreading / closing)
+                        if (Math.abs(dSpan) > 0.05) {
+                            if (dSpan > 0) {
+                                updateSensorText("[ ZOOM IN ]", "#00ff66");
+                                setSystemZoom(currentSystemZoom + 0.1);
+                            } else {
+                                updateSensorText("[ ZOOM OUT ]", "#ff003c");
+                                setSystemZoom(currentSystemZoom - 0.1);
+                            }
+                            gestureTimer = Date.now();
+                            return;
+                        }
+
+                        // PAUSE (Open hand, relatively still)
+                        const isOpen = span > 0.15;
+                        if (isOpen && Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) {
+                            updateSensorText("[ SYSTEM PAUSED ]", "#fff");
+                            targetSpeed = 0; // Pauses the background nebula
+                        } else {
+                            updateSensorText("[ TRACKING ACTIVE ]", "#0ff");
+                        }
+                    }
+
+                    lastHandX = indexFinger.x; lastHandY = indexFinger.y; lastHandSpan = Math.hypot(thumb.x - pinky.x, thumb.y - pinky.y);
+
+                } else {
+                    updateSensorText("SCANNING...", "#888");
+                    lastHandX = null; lastHandY = null; lastHandSpan = null;
+                }
+                canvasCtx.restore();
+            }
+
+            const hands = new Hands({locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }});
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7 });
+            hands.onResults(onResults);
+
+            const camera = new Camera(videoElement, {
+                onFrame: async () => { await hands.send({image: videoElement}); },
+                width: 160, height: 120
+            });
+            camera.start();
         }
     </script>
 </body>
